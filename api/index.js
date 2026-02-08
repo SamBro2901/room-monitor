@@ -2,9 +2,16 @@ import express from "express";
 import { z } from "zod";
 import { connectDB } from "../lib/db.js";
 import { Reading } from "../lib/models/Reading.js";
+import path from "path";
+import { fileURLToPath } from "url";
+
 
 const app = express();
 app.use(express.json({ limit: "64kb" }));
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 
 const Payload = z.object({
   deviceId: z.string().min(1),
@@ -15,8 +22,16 @@ const Payload = z.object({
 });
 
 // health check
-app.get("/health", (req, res) => res.json({ ok: true }));
+app.get("/health", (req, res) => res.status(200).json({ ok: true }));
 
+// Serve dashboard static files
+app.use("/dashboard/static", express.static(path.join(__dirname, "../public")));
+
+app.get("/dashboard", (req, res) => {
+  res.sendFile(path.join(__dirname, "../public/dashboard.html"));
+});
+
+// Ingest endpoint for ESP32 devices
 app.post("/ingest", async (req, res) => {
   try {
     // Simple header auth for ESP32
@@ -45,12 +60,84 @@ app.post("/ingest", async (req, res) => {
       aqi
     });
 
-    return res.json({ ok: true, id: doc._id });
+    return res.status(201).json({ ok: true, id: doc._id });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: "Server error" });
   }
 });
 
-// IMPORTANT: export the app as the serverless handler
+// List known devices
+app.get("/api/devices", async (req, res) => {
+  try {
+    await connectDB();
+    const devices = await Reading.distinct("meta.deviceId");
+    res.json({ ok: true, devices: devices.sort() });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ ok: false, error: "Server error" });
+  }
+});
+
+// Query readings by device + time window
+app.get("/api/readings", async (req, res) => {
+  try {
+    const deviceId = String(req.query.deviceId || "");
+    if (!deviceId) return res.status(400).json({ ok: false, error: "deviceId is required" });
+
+    const limit = Math.min(parseInt(String(req.query.limit || "2000"), 10) || 2000, 5000);
+    const from = req.query.from ? new Date(String(req.query.from)) : new Date(Date.now() - 6 * 60 * 60 * 1000); // default 6h
+    const to = req.query.to ? new Date(String(req.query.to)) : new Date();
+
+    if (Number.isNaN(from.getTime()) || Number.isNaN(to.getTime())) {
+      return res.status(400).json({ ok: false, error: "Invalid from/to datetime" });
+    }
+
+    await connectDB();
+
+    const docs = await Reading.find(
+      {
+        "meta.deviceId": deviceId,
+        ts: { $gte: from, $lte: to }
+      },
+      { _id: 0, ts: 1, temperature: 1, humidity: 1, aqi: 1, "meta.deviceId": 1 }
+    )
+      .sort({ ts: 1 })
+      .limit(limit)
+      .lean();
+
+    res.json({ ok: true, deviceId, from, to, count: docs.length, readings: docs });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ ok: false, error: "Server error" });
+  }
+});
+
+// Latest reading per device (nice for overview cards later)
+app.get("/api/latest", async (req, res) => {
+  try {
+    await connectDB();
+    const latest = await Reading.aggregate([
+      { $sort: { ts: -1 } },
+      {
+        $group: {
+          _id: "$meta.deviceId",
+          ts: { $first: "$ts" },
+          temperature: { $first: "$temperature" },
+          humidity: { $first: "$humidity" },
+          aqi: { $first: "$aqi" }
+        }
+      },
+      { $project: { _id: 0, deviceId: "$_id", ts: 1, temperature: 1, humidity: 1, aqi: 1 } },
+      { $sort: { deviceId: 1 } }
+    ]);
+
+    res.json({ ok: true, latest });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ ok: false, error: "Server error" });
+  }
+});
+
+
 export default app;

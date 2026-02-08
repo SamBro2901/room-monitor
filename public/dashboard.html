@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Room Monitoring Dashboard</title>
+  <link rel="stylesheet" href="/dashboard/static/dashboard.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <h1>Room Monitoring</h1>
+      <p class="sub">Live sensor readings from MongoDB Atlas time-series</p>
+    </div>
+
+    <div class="controls">
+      <label>
+        Device
+        <select id="deviceSelect"></select>
+      </label>
+
+      <label>
+        Range
+        <select id="rangeSelect">
+          <option value="1h">Last 1 hour</option>
+          <option value="6h" selected>Last 6 hours</option>
+          <option value="24h">Last 24 hours</option>
+          <option value="7d">Last 7 days</option>
+        </select>
+      </label>
+
+      <button id="refreshBtn">Refresh</button>
+      <span id="status" class="status"></span>
+    </div>
+  </header>
+
+  <main class="grid">
+    <section class="card kpis">
+      <div class="kpi">
+        <div class="label">Temperature</div>
+        <div class="value" id="kpiTemp">—</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Humidity</div>
+        <div class="value" id="kpiHum">—</div>
+      </div>
+      <div class="kpi">
+        <div class="label">AQI</div>
+        <div class="value" id="kpiAqi">—</div>
+      </div>
+      <div class="kpi">
+        <div class="label">Last update</div>
+        <div class="value small" id="kpiTs">—</div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Temperature</h2>
+      <canvas id="tempChart"></canvas>
+    </section>
+
+    <section class="card">
+      <h2>Humidity</h2>
+      <canvas id="humChart"></canvas>
+    </section>
+
+    <section class="card">
+      <h2>AQI</h2>
+      <canvas id="aqiChart"></canvas>
+    </section>
+
+    <section class="card tableCard">
+      <h2>Recent readings</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Temp</th>
+            <th>Humidity</th>
+            <th>AQI</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </section>
+  </main>
+
+  <script src="/dashboard/static/dashboard.js"></script>
+</body>
+</html>
