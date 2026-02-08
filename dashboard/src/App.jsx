@@ -104,7 +104,7 @@ export default function App() {
 		const data = await fetchJSON('/api/devices');
 		const list = (data.devices ?? []).slice().sort();
 		setDevices(list);
-		setDeviceId((prev) => prev || list[0] || '');
+		setDeviceId((prev) => (prev && list.includes(prev) ? prev : list[0] || ''));
 		setStatus(list.length ? '' : 'No devices found yet.');
 	}
 
@@ -135,10 +135,17 @@ export default function App() {
 		}
 	}
 
-	// initial load
+	// load devices whenever the dashboard key becomes available/changes
 	useEffect(() => {
+		if (!dashKey) {
+			setStatus('Enter Dashboard Key to load data.');
+			setDevices([]);
+			setDeviceId('');
+			setReadings([]);
+			return;
+		}
 		loadDevices().catch((e) => setStatus(`Error: ${e.message}`));
-	}, []);
+	}, [dashKey]);
 
 	// reload readings when device or range changes
 	useEffect(() => {
@@ -235,8 +242,8 @@ export default function App() {
 
 					<button
 						className="btn"
-						onClick={() => loadReadings()}
-						disabled={loading || !deviceId}
+						onClick={() => (deviceId ? loadReadings() : loadDevices())}
+						disabled={loading || !dashKey}
 						title="Fetch latest data"
 					>
 						{loading ? 'Loading…' : 'Refresh'}
