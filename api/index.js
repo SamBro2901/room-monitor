@@ -7,6 +7,36 @@ const app = express();
 app.disable("x-powered-by");
 app.use(express.json({ limit: "64kb" }));
 
+// --- Dashboard / Read API auth (protects /api/*) ---
+function getDashboardKey(req) {
+  // Prefer Authorization: Bearer <key>
+  const auth = req.header("authorization") || "";
+  const m = auth.match(/^Bearer\s+(.+)$/i);
+  if (m) return m[1];
+
+  // Also accept x-dashboard-key: <key>
+  return req.header("x-dashboard-key") || "";
+}
+
+function requireDashboardKey(req, res, next) {
+  const required = process.env.DASHBOARD_API_KEY;
+  if (!required) {
+    // Fail closed: don't expose data if key is not configured
+    return res.status(500).json({ ok: false, error: "DASHBOARD_API_KEY not configured" });
+  }
+
+  const provided = getDashboardKey(req);
+  if (!provided || provided !== required) {
+    return res.status(401).json({ ok: false, error: "Unauthorized" });
+  }
+
+  next();
+}
+
+// Apply to all read API endpoints
+app.use("/api", requireDashboardKey);
+
+
 // Nice error if someone/esp32 sends invalid JSON
 app.use((err, req, res, next) => {
   if (err?.type === "entity.parse.failed") {

@@ -48,7 +48,7 @@
   color: #a9b6cc;
 }
 
-select, .btn {
+select, input, .btn {
   background: #141c2b;
   color: #e6edf7;
   border: 1px solid rgba(255,255,255,0.12);

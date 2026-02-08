@@ -77,6 +77,9 @@ function ChartCard({ title, data, dataKey, unit }) {
 }
 
 export default function App() {
+	const [dashKey, setDashKey] = useState(
+		() => localStorage.getItem('DASHBOARD_API_KEY') || '',
+	);
 	const [devices, setDevices] = useState([]);
 	const [deviceId, setDeviceId] = useState('');
 	const [range, setRange] = useState('6h');
@@ -87,7 +90,11 @@ export default function App() {
 	const timerRef = useRef(null);
 
 	async function fetchJSON(url) {
-		const res = await fetch(url);
+		const res = await fetch(url, {
+			headers: dashKey
+				? { 'x-dashboard-key': dashKey } // or Authorization: `Bearer ${dashKey}`
+				: {},
+		});
 		if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
 		return res.json();
 	}
@@ -181,6 +188,19 @@ export default function App() {
 	return (
 		<div className="page">
 			<header className="topbar">
+				<label className="control">
+					<span>Dashboard Key</span>
+					<input
+						type="password"
+						value={dashKey}
+						onChange={(e) => {
+							setDashKey(e.target.value);
+							localStorage.setItem('DASHBOARD_API_KEY', e.target.value);
+						}}
+						placeholder="Enter key"
+					/>
+				</label>
+
 				<div>
 					<div className="title">Room Monitoring</div>
 					<div className="subtitle">
