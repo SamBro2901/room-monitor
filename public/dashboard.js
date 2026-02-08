@@ -73,7 +73,7 @@ function fillKPIs(latest) {
   kpiTemp.textContent = `${fmt(latest.temperature)} °C`;
   kpiHum.textContent = `${fmt(latest.humidity)} %`;
   kpiAqi.textContent = `${fmt(latest.aqi)}`;
-  kpiTs.textContent = new Date(latest.ts).toLocaleString();
+  kpiTs.textContent = new Date(latest.ts).toLocaleString("en-GB");
 }
 
 function fillTable(readings) {
