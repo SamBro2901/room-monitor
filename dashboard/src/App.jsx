@@ -9,6 +9,7 @@ import {
 	ResponsiveContainer,
 } from 'recharts';
 import './App.css';
+import Select from 'react-select';
 
 function rangeToMs(v) {
 	switch (v) {
@@ -54,18 +55,24 @@ function ChartCard({ title, data, dataKey, unit }) {
 			<div className="cardTitle">{title}</div>
 			<div className="chartWrap">
 				<ResponsiveContainer width="100%" height="100%">
-					<LineChart data={data}>
+					<LineChart
+						data={data}
+						syncId="room-monitor" // ✅ same id across all charts
+						syncMethod="index" // (default) works since all charts share chartData
+					>
 						<CartesianGrid strokeDasharray="3 3" opacity={0.2} />
 						<XAxis dataKey="t" tick={{ fontSize: 12 }} minTickGap={24} />
 						<YAxis tick={{ fontSize: 12 }} width={42} />
 						<Tooltip
 							formatter={(v) => [`${fmt1(v)}${unit ?? ''}`, title]}
 							labelFormatter={(label) => `Time: ${label}`}
+							cursor={{ opacity: 0.2 }} // optional: makes the synced hover line more visible
 						/>
 						<Line
 							type="monotone"
 							dataKey={dataKey}
 							dot={false}
+							activeDot={{ r: 5 }} // ✅ visible highlight on hover (and synced charts)
 							strokeWidth={2}
 							isAnimationActive={false}
 						/>
@@ -180,7 +187,9 @@ export default function App() {
 	}, [readings]);
 
 	const latest = readings.length ? readings[readings.length - 1] : null;
-	const latestTs = latest?.ts ? new Date(latest.ts).toLocaleString() : '—';
+	const latestTs = latest?.ts
+		? new Date(latest.ts).toLocaleString('en-GB')
+		: '—';
 
 	const tableRows = useMemo(() => {
 		const rows = readings.slice(-25).reverse();
@@ -191,6 +200,66 @@ export default function App() {
 			aqi: r.aqi,
 		}));
 	}, [readings]);
+
+	const deviceOptions = useMemo(
+		() => devices.map((d) => ({ value: d, label: d })),
+		[devices],
+	);
+
+	const rangeOptions = useMemo(
+		() => [
+			{ value: '1h', label: 'Last 1 hour' },
+			{ value: '6h', label: 'Last 6 hours' },
+			{ value: '24h', label: 'Last 24 hours' },
+			{ value: '7d', label: 'Last 7 days' },
+		],
+		[],
+	);
+
+	// Dark theme styles to match your UI
+	const selectStyles = useMemo(
+		() => ({
+			control: (base, state) => ({
+				...base,
+				backgroundColor: '#141c2b',
+				borderColor: state.isFocused
+					? 'rgba(255,255,255,0.25)'
+					: 'rgba(255,255,255,0.12)',
+				boxShadow: 'none',
+				borderRadius: 10,
+				minHeight: 38,
+				color: '#e6edf7',
+			}),
+			singleValue: (base) => ({ ...base, color: '#e6edf7' }),
+			input: (base) => ({ ...base, color: '#e6edf7' }),
+			placeholder: (base) => ({ ...base, color: '#a9b6cc' }),
+			menu: (base) => ({
+				...base,
+				backgroundColor: '#0f1624',
+				border: '1px solid rgba(255,255,255,0.10)',
+				borderRadius: 12,
+				overflow: 'hidden',
+			}),
+			option: (base, state) => ({
+				...base,
+				backgroundColor: state.isSelected
+					? 'rgba(255,255,255,0.10)'
+					: state.isFocused
+						? 'rgba(255,255,255,0.06)'
+						: 'transparent',
+				color: '#e6edf7',
+				cursor: 'pointer',
+			}),
+			indicatorSeparator: (base) => ({
+				...base,
+				backgroundColor: 'rgba(255,255,255,0.12)',
+			}),
+			dropdownIndicator: (base) => ({ ...base, color: '#a9b6cc' }),
+			clearIndicator: (base) => ({ ...base, color: '#a9b6cc' }),
+			menuPortal: (base) => ({ ...base, zIndex: 9999 }), // prevents clipping under sticky header
+		}),
+		[],
+	);
 
 	return (
 		<div className="page">
@@ -218,26 +287,29 @@ export default function App() {
 				<div className="controls">
 					<label className="control">
 						<span>Device</span>
-						<select
-							value={deviceId}
-							onChange={(e) => setDeviceId(e.target.value)}
-						>
-							{devices.map((d) => (
-								<option key={d} value={d}>
-									{d}
-								</option>
-							))}
-						</select>
+						<Select
+							styles={selectStyles}
+							options={deviceOptions}
+							value={deviceOptions.find((o) => o.value === deviceId) || null}
+							onChange={(opt) => setDeviceId(opt?.value || '')}
+							isDisabled={!dashKey || deviceOptions.length === 0}
+							placeholder={dashKey ? 'Select device…' : 'Enter key first…'}
+							isSearchable
+							menuPortalTarget={document.body}
+						/>
 					</label>
 
 					<label className="control">
 						<span>Range</span>
-						<select value={range} onChange={(e) => setRange(e.target.value)}>
-							<option value="1h">Last 1 hour</option>
-							<option value="6h">Last 6 hours</option>
-							<option value="24h">Last 24 hours</option>
-							<option value="7d">Last 7 days</option>
-						</select>
+						<Select
+							styles={selectStyles}
+							options={rangeOptions}
+							value={rangeOptions.find((o) => o.value === range) || null}
+							onChange={(opt) => setRange(opt?.value || '6h')}
+							isDisabled={!dashKey}
+							isSearchable={false}
+							menuPortalTarget={document.body}
+						/>
 					</label>
 
 					<button
