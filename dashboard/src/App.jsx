@@ -11,6 +11,12 @@ import {
 import './App.css';
 import Select from 'react-select';
 
+const LINE_COLORS = {
+	temperature: '#4C7DFF',
+	humidity: '#2FE4A8',
+	aqi: '#FF4D6D',
+};
+
 // simple downsample so charts stay snappy
 function downsample(arr, maxPoints = 800) {
 	if (arr.length <= maxPoints) return arr;
@@ -57,6 +63,7 @@ function ChartCard({ title, data, dataKey, unit }) {
 							type="monotone"
 							dataKey={dataKey}
 							dot={false}
+							stroke={LINE_COLORS[dataKey]}
 							activeDot={{ r: 5 }} // ✅ visible highlight on hover (and synced charts)
 							strokeWidth={2}
 							isAnimationActive={false}
@@ -227,8 +234,10 @@ export default function App() {
 			control: (base, state) => ({
 				...base,
 				backgroundColor: 'var(--control-bg)',
+				backdropFilter: 'blur(14px) saturate(160%)',
+				WebkitBackdropFilter: 'blur(14px) saturate(160%)',
 				borderColor: state.isFocused ? 'var(--focus-border)' : 'var(--border)',
-				boxShadow: 'none',
+				boxShadow: state.isFocused ? 'var(--glow)' : 'none',
 				borderRadius: 10,
 				minHeight: 38,
 				color: 'var(--text)',
@@ -242,6 +251,9 @@ export default function App() {
 				border: '1px solid var(--border-soft)',
 				borderRadius: 12,
 				overflow: 'hidden',
+				backdropFilter: 'blur(16px) saturate(170%)',
+				WebkitBackdropFilter: 'blur(16px) saturate(170%)',
+				boxShadow: 'var(--shadow)',
 			}),
 			option: (base, state) => ({
 				...base,
@@ -280,21 +292,12 @@ export default function App() {
 					/>
 				</label>
 
-				<div>
+				{/* <div>
 					<div className="title">Room Monitoring</div>
 					<div className="subtitle">
 						MongoDB time-series → Vercel API → React dashboard
 					</div>
-				</div>
-
-				<button
-					className="btn"
-					type="button"
-					onClick={() => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))}
-					title="Toggle theme"
-				>
-					{theme === 'dark' ? 'Light' : 'Dark'}
-				</button>
+				</div> */}
 
 				<div className="controls">
 					<label className="control">
@@ -357,6 +360,14 @@ export default function App() {
 						{loading ? 'Loading…' : 'Refresh'}
 					</button>
 					<div className="status">{status}</div>
+					<button
+						className="btn"
+						type="button"
+						onClick={() => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))}
+						title="Toggle theme"
+					>
+						{theme === 'dark' ? '🌙' : '☀️'}
+					</button>
 				</div>
 			</header>
 

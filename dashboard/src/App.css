@@ -1,67 +1,90 @@
-/* dashboard/src/App.css */
+/* dashboard/src/App.css
+   Modern glassmorphism skin (keeps existing class names + JSX behavior)
+*/
 
 /* =========================
   Theme tokens (LIGHT default)
-   ========================= */
+  ========================= */
 :root {
   color-scheme: light;
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  text-rendering: optimizeLegibility;
 
-  /* Light palette */
-  --bg: #f6f8fb;
-  --text: #0b0f16;
-  --muted: #5b677a;
+  /* Background (multi-layer gradient) */
+  --bg: radial-gradient(1100px circle at 12% 8%, rgba(107, 170, 255, 0.45), transparent 55%),
+        radial-gradient(900px circle at 88% 18%, rgba(255, 134, 219, 0.35), transparent 55%),
+        radial-gradient(1000px circle at 40% 115%, rgba(110, 255, 198, 0.25), transparent 60%),
+        linear-gradient(180deg, #f7f9ff 0%, #eef2ff 40%, #f6f8ff 100%);
 
-  --topbar-bg: rgba(246, 248, 251, 0.92);
+  --text: rgba(10, 14, 22, 0.92);
+  --muted: rgba(20, 28, 44, 0.62);
 
-  --card-bg: #ffffff;
-  --kpi-bg: #f1f4f9;
+  /* Glass surfaces */
+  --glass: rgba(255, 255, 255, 0.58);
+  --glass-strong: rgba(255, 255, 255, 0.72);
+  --glass-soft: rgba(255, 255, 255, 0.40);
+  --control-bg: rgba(255, 255, 255, 0.45);
 
-  --control-bg: #ffffff;
+  /* Compatibility tokens (used by existing inline react-select styles) */
+  --card-bg: var(--glass);
+  --kpi-bg: var(--glass-soft);
 
-  --border: rgba(0, 0, 0, 0.12);
-  --border-soft: rgba(0, 0, 0, 0.08);
+  --border: rgba(10, 14, 22, 0.14);
+  --border-soft: rgba(10, 14, 22, 0.10);
+  --focus-border: rgba(10, 14, 22, 0.30);
 
-  --focus-border: rgba(0, 0, 0, 0.25);
+  --shadow: 0 18px 50px rgba(10, 14, 22, 0.10);
+  --shadow-soft: 0 10px 30px rgba(10, 14, 22, 0.08);
+  --glow: 0 0 0 4px rgba(107, 170, 255, 0.18);
 
-  --shadow: 0 10px 30px rgba(0, 0, 0, 0.10);
+  --row-hover: rgba(10, 14, 22, 0.04);
 
-  --row-hover: rgba(0, 0, 0, 0.03);
+  /* Layout */
+  --container: 1240px;
+  --radius-xl: 18px;
+  --radius-lg: 14px;
+  --radius-md: 12px;
+  --radius-sm: 10px;
 }
 
-/* Optional DARK theme (only applies if you set <html data-theme="dark">) */
+/* DARK theme (applies when <html data-theme="dark">) */
 :root[data-theme="dark"] {
   color-scheme: dark;
 
-  --bg: #0b0f16;
-  --text: #e6edf7;
-  --muted: #a9b6cc;
+  --bg: radial-gradient(1100px circle at 12% 8%, rgba(75, 140, 255, 0.25), transparent 55%),
+        radial-gradient(900px circle at 88% 18%, rgba(255, 102, 196, 0.18), transparent 55%),
+        radial-gradient(1000px circle at 40% 115%, rgba(90, 255, 196, 0.14), transparent 60%),
+        linear-gradient(180deg, #070b12 0%, #090f1a 40%, #060912 100%);
 
-  --topbar-bg: rgba(11, 15, 22, 0.92);
+  --text: rgba(236, 242, 255, 0.92);
+  --muted: rgba(202, 214, 240, 0.68);
 
-  --card-bg: #0f1624;
-  --kpi-bg: #0b1220;
+  --glass: rgba(16, 22, 36, 0.58);
+  --glass-strong: rgba(16, 22, 36, 0.72);
+  --glass-soft: rgba(16, 22, 36, 0.40);
+  --control-bg: rgba(20, 28, 46, 0.55);
 
-  --control-bg: #141c2b;
+  /* Compatibility tokens (used by existing inline react-select styles) */
+  --card-bg: var(--glass);
+  --kpi-bg: var(--glass-soft);
 
-  --border: rgba(255, 255, 255, 0.12);
-  --border-soft: rgba(255, 255, 255, 0.08);
+  --border: rgba(255, 255, 255, 0.16);
+  --border-soft: rgba(255, 255, 255, 0.10);
+  --focus-border: rgba(255, 255, 255, 0.26);
 
-  --focus-border: rgba(255, 255, 255, 0.25);
+  --shadow: 0 22px 60px rgba(0, 0, 0, 0.40);
+  --shadow-soft: 0 14px 38px rgba(0, 0, 0, 0.35);
+  --glow: 0 0 0 4px rgba(108, 180, 255, 0.20);
 
-  --shadow: 0 10px 30px rgba(0, 0, 0, 0.22);
-
-  --row-hover: rgba(255, 255, 255, 0.03);
+  --row-hover: rgba(255, 255, 255, 0.05);
 }
 
 /* =========================
   Base
-   ========================= */
+  ========================= */
 * { box-sizing: border-box; }
 
-html, body {
-  height: 100%;
-}
+html, body { height: 100%; }
 
 body {
   margin: 0;
@@ -69,32 +92,58 @@ body {
   color: var(--text);
 }
 
-/* =========================
-  Layout (existing class names)
-   ========================= */
+/* Subtle texture overlay */
 .page {
   min-height: 100vh;
   background: var(--bg);
   color: var(--text);
+  position: relative;
+  isolation: isolate;
 }
 
+.page::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0.10;
+  background-image:
+    radial-gradient(rgba(255, 255, 255, 0.12) 1px, transparent 1px);
+  background-size: 3px 3px;
+  mix-blend-mode: overlay;
+}
+
+/* =========================
+  Topbar
+  ========================= */
 .topbar {
   position: sticky;
-  top: 0;
+  top: 14px;
   z-index: 10;
-  background: var(--topbar-bg);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--border-soft);
-  padding: 14px 18px;
+
+  width: min(var(--container), calc(100% - 24px));
+  margin: 14px auto 10px;
+  padding: 14px 16px;
+
   display: flex;
-  gap: 16px;
+  gap: 14px;
   justify-content: space-between;
   align-items: center;
+
+  background: var(--glass);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-soft);
+
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
 }
 
 .title {
-  font-size: 18px;
-  font-weight: 650;
+  font-size: 16px;
+  font-weight: 750;
+  letter-spacing: 0.2px;
 }
 
 .subtitle {
@@ -106,37 +155,72 @@ body {
 .controls {
   display: flex;
   gap: 10px;
-  align-items: end;
+  align-items: flex-end;
   flex-wrap: wrap;
 }
 
 .control {
   display: grid;
-  gap: 4px;
+  gap: 6px;
   font-size: 12px;
   color: var(--muted);
 }
 
-/* Inputs / Buttons */
+/* =========================
+  Inputs / Buttons
+  ========================= */
 select,
 input,
-.btn {
+.btn,
+.rangeBtn {
   background: var(--control-bg);
   color: var(--text);
   border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 8px 10px;
+  border-radius: var(--radius-sm);
+  padding: 9px 10px;
   outline: none;
+  box-shadow: none;
+
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+
+  transition: transform 140ms ease, box-shadow 140ms ease, border-color 140ms ease, background-color 140ms ease;
 }
 
-input::placeholder {
-  color: var(--muted);
-}
+input::placeholder { color: color-mix(in oklab, var(--muted) 80%, transparent); }
 
 select:focus,
 input:focus,
-.btn:focus {
+.btn:focus,
+.rangeBtn:focus {
   border-color: var(--focus-border);
+  box-shadow: var(--glow);
+}
+
+.btn,
+.rangeBtn {
+  cursor: pointer;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.btn:hover,
+.rangeBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-soft);
+}
+
+.btn:active,
+.rangeBtn:active {
+  transform: translateY(0px);
+}
+
+.btn:disabled,
+.rangeBtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 /* Range preset buttons */
@@ -146,38 +230,10 @@ input:focus,
   flex-wrap: wrap;
 }
 
-.rangeBtn {
-  background: var(--control-bg);
-  color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 8px 10px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.rangeBtn:hover {
-  background: var(--row-hover);
-}
-
-.rangeBtn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
 .rangeBtn.active {
-  background: var(--kpi-bg);
+  background: var(--glass-strong);
   border-color: var(--focus-border);
-}
-
-.btn {
-  cursor: pointer;
-  font-weight: 600;
-}
-
-.btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+  box-shadow: var(--glow);
 }
 
 .status {
@@ -186,25 +242,52 @@ input:focus,
   min-width: 140px;
 }
 
-/* Grid + cards */
+/* =========================
+  Main grid + cards
+  ========================= */
 .grid {
-  padding: 16px 18px;
+  width: min(var(--container), calc(100% - 24px));
+  margin: 0 auto 22px;
+  padding: 12px 0;
   display: grid;
   gap: 14px;
   grid-template-columns: 1fr 1fr;
 }
 
 .card {
-  background: var(--card-bg);
+  position: relative;
+  background: var(--glass);
   border: 1px solid var(--border-soft);
-  border-radius: 14px;
+  border-radius: var(--radius-xl);
   padding: 14px;
   box-shadow: var(--shadow);
+  overflow: hidden;
+
+  backdrop-filter: blur(18px) saturate(170%);
+  -webkit-backdrop-filter: blur(18px) saturate(170%);
+
+  transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+.card::before {
+  /* top highlight sheen */
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(120deg, rgba(255,255,255,0.22), transparent 35%, transparent 65%, rgba(255,255,255,0.08));
+  opacity: 0.55;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-soft);
 }
 
 .cardTitle {
-  font-size: 14px;
-  font-weight: 650;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.25px;
   margin-bottom: 10px;
 }
 
@@ -217,10 +300,12 @@ input:focus,
 }
 
 .kpi {
-  background: var(--kpi-bg);
+  background: var(--glass-soft);
   border: 1px solid var(--border-soft);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   padding: 12px;
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
 }
 
 .kpiLabel {
@@ -230,6 +315,7 @@ input:focus,
 
 .kpiValue {
   font-size: 18px;
+  font-weight: 800;
   margin-top: 6px;
 }
 
@@ -240,18 +326,33 @@ input:focus,
 }
 
 /* Charts */
-.chartWrap {
-  height: 260px;
+.chartWrap { height: 260px; }
+
+/* Recharts theme tweaks */
+.recharts-wrapper text { fill: color-mix(in oklab, var(--text) 80%, transparent); }
+.recharts-cartesian-grid line { stroke: color-mix(in oklab, var(--text) 20%, transparent); }
+.recharts-cartesian-axis-line,
+.recharts-cartesian-axis-tick-line { stroke: color-mix(in oklab, var(--text) 18%, transparent); }
+.recharts-tooltip-wrapper { outline: none; }
+.recharts-default-tooltip {
+  background: var(--glass-strong) !important;
+  border: 1px solid var(--border-soft) !important;
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow) !important;
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
 }
 
 /* Table */
-.tableCard {
-  grid-column: 1 / -1;
-}
+.tableCard { grid-column: 1 / -1; }
 
 .tableWrap {
   overflow: auto;
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-soft);
+  background: var(--glass-soft);
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
 }
 
 table {
@@ -263,24 +364,46 @@ table {
 thead th {
   text-align: left;
   color: var(--muted);
-  font-weight: 600;
-  padding: 10px 8px;
+  font-weight: 800;
+  padding: 10px 10px;
   border-bottom: 1px solid var(--border-soft);
   white-space: nowrap;
+  background: color-mix(in oklab, var(--glass-strong) 70%, transparent);
 }
 
 tbody td {
-  padding: 10px 8px;
+  padding: 10px 10px;
   border-bottom: 1px solid var(--border-soft);
   white-space: nowrap;
 }
 
-tbody tr:hover {
-  background: var(--row-hover);
-}
+tbody tr:hover { background: var(--row-hover); }
 
-/* Responsive */
+/* =========================
+  Responsive
+  ========================= */
 @media (max-width: 980px) {
   .grid { grid-template-columns: 1fr; }
   .kpis { grid-template-columns: 1fr 1fr; }
+  .topbar {
+    top: 10px;
+    margin: 10px auto 8px;
+    padding: 12px 12px;
+    align-items: flex-start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  select,
+  input,
+  .btn,
+  .rangeBtn {
+    transition: none;
+  }
+  .card:hover,
+  .btn:hover,
+  .rangeBtn:hover {
+    transform: none;
+  }
 }
