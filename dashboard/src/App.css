@@ -1,21 +1,90 @@
+/* dashboard/src/App.css */
+
+/* =========================
+  Theme tokens (LIGHT default)
+   ========================= */
 :root {
-  color-scheme: dark;
+  color-scheme: light;
   font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+
+  /* Light palette */
+  --bg: #f6f8fb;
+  --text: #0b0f16;
+  --muted: #5b677a;
+
+  --topbar-bg: rgba(246, 248, 251, 0.92);
+
+  --card-bg: #ffffff;
+  --kpi-bg: #f1f4f9;
+
+  --control-bg: #ffffff;
+
+  --border: rgba(0, 0, 0, 0.12);
+  --border-soft: rgba(0, 0, 0, 0.08);
+
+  --focus-border: rgba(0, 0, 0, 0.25);
+
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.10);
+
+  --row-hover: rgba(0, 0, 0, 0.03);
 }
 
+/* Optional DARK theme (only applies if you set <html data-theme="dark">) */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg: #0b0f16;
+  --text: #e6edf7;
+  --muted: #a9b6cc;
+
+  --topbar-bg: rgba(11, 15, 22, 0.92);
+
+  --card-bg: #0f1624;
+  --kpi-bg: #0b1220;
+
+  --control-bg: #141c2b;
+
+  --border: rgba(255, 255, 255, 0.12);
+  --border-soft: rgba(255, 255, 255, 0.08);
+
+  --focus-border: rgba(255, 255, 255, 0.25);
+
+  --shadow: 0 10px 30px rgba(0, 0, 0, 0.22);
+
+  --row-hover: rgba(255, 255, 255, 0.03);
+}
+
+/* =========================
+  Base
+   ========================= */
+* { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* =========================
+  Layout (existing class names)
+   ========================= */
 .page {
   min-height: 100vh;
-  background: #0b0f16;
-  color: #e6edf7;
+  background: var(--bg);
+  color: var(--text);
 }
 
 .topbar {
   position: sticky;
   top: 0;
   z-index: 10;
-  background: rgba(11, 15, 22, 0.92);
+  background: var(--topbar-bg);
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255,255,255,0.08);
+  border-bottom: 1px solid var(--border-soft);
   padding: 14px 18px;
   display: flex;
   gap: 16px;
@@ -31,7 +100,7 @@
 .subtitle {
   margin-top: 4px;
   font-size: 12px;
-  color: #a9b6cc;
+  color: var(--muted);
 }
 
 .controls {
@@ -45,15 +114,60 @@
   display: grid;
   gap: 4px;
   font-size: 12px;
-  color: #a9b6cc;
+  color: var(--muted);
 }
 
-select, input, .btn {
-  background: #141c2b;
-  color: #e6edf7;
-  border: 1px solid rgba(255,255,255,0.12);
+/* Inputs / Buttons */
+select,
+input,
+.btn {
+  background: var(--control-bg);
+  color: var(--text);
+  border: 1px solid var(--border);
   border-radius: 10px;
   padding: 8px 10px;
+  outline: none;
+}
+
+input::placeholder {
+  color: var(--muted);
+}
+
+select:focus,
+input:focus,
+.btn:focus {
+  border-color: var(--focus-border);
+}
+
+/* Range preset buttons */
+.rangeGroup {
+  display: inline-flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.rangeBtn {
+  background: var(--control-bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.rangeBtn:hover {
+  background: var(--row-hover);
+}
+
+.rangeBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.rangeBtn.active {
+  background: var(--kpi-bg);
+  border-color: var(--focus-border);
 }
 
 .btn {
@@ -68,10 +182,11 @@ select, input, .btn {
 
 .status {
   font-size: 12px;
-  color: #a9b6cc;
+  color: var(--muted);
   min-width: 140px;
 }
 
+/* Grid + cards */
 .grid {
   padding: 16px 18px;
   display: grid;
@@ -80,11 +195,11 @@ select, input, .btn {
 }
 
 .card {
-  background: #0f1624;
-  border: 1px solid rgba(255,255,255,0.08);
+  background: var(--card-bg);
+  border: 1px solid var(--border-soft);
   border-radius: 14px;
   padding: 14px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.22);
+  box-shadow: var(--shadow);
 }
 
 .cardTitle {
@@ -93,6 +208,7 @@ select, input, .btn {
   margin-bottom: 10px;
 }
 
+/* KPI section */
 .kpis {
   grid-column: 1 / -1;
   display: grid;
@@ -101,15 +217,15 @@ select, input, .btn {
 }
 
 .kpi {
-  background: #0b1220;
-  border: 1px solid rgba(255,255,255,0.06);
+  background: var(--kpi-bg);
+  border: 1px solid var(--border-soft);
   border-radius: 12px;
   padding: 12px;
 }
 
 .kpiLabel {
   font-size: 12px;
-  color: #a9b6cc;
+  color: var(--muted);
 }
 
 .kpiValue {
@@ -120,13 +236,15 @@ select, input, .btn {
 .kpiSub {
   margin-top: 6px;
   font-size: 12px;
-  color: #a9b6cc;
+  color: var(--muted);
 }
 
+/* Charts */
 .chartWrap {
   height: 260px;
 }
 
+/* Table */
 .tableCard {
   grid-column: 1 / -1;
 }
@@ -144,23 +262,24 @@ table {
 
 thead th {
   text-align: left;
-  color: #a9b6cc;
+  color: var(--muted);
   font-weight: 600;
   padding: 10px 8px;
-  border-bottom: 1px solid rgba(255,255,255,0.08);
+  border-bottom: 1px solid var(--border-soft);
   white-space: nowrap;
 }
 
 tbody td {
   padding: 10px 8px;
-  border-bottom: 1px solid rgba(255,255,255,0.06);
+  border-bottom: 1px solid var(--border-soft);
   white-space: nowrap;
 }
 
 tbody tr:hover {
-  background: rgba(255,255,255,0.03);
+  background: var(--row-hover);
 }
 
+/* Responsive */
 @media (max-width: 980px) {
   .grid { grid-template-columns: 1fr; }
   .kpis { grid-template-columns: 1fr 1fr; }

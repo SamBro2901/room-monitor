@@ -11,21 +11,6 @@ import {
 import './App.css';
 import Select from 'react-select';
 
-function rangeToMs(v) {
-	switch (v) {
-		case '1h':
-			return 1 * 60 * 60 * 1000;
-		case '6h':
-			return 6 * 60 * 60 * 1000;
-		case '24h':
-			return 24 * 60 * 60 * 1000;
-		case '7d':
-			return 7 * 24 * 60 * 60 * 1000;
-		default:
-			return 6 * 60 * 60 * 1000;
-	}
-}
-
 // simple downsample so charts stay snappy
 function downsample(arr, maxPoints = 800) {
 	if (arr.length <= maxPoints) return arr;
@@ -83,6 +68,16 @@ function ChartCard({ title, data, dataKey, unit }) {
 	);
 }
 
+const RANGE_PRESETS = [
+	{ value: '15m', label: '15m', ms: 15 * 60 * 1000 },
+	{ value: '30m', label: '30m', ms: 30 * 60 * 1000 },
+	{ value: '1h', label: '1h', ms: 60 * 60 * 1000 },
+	{ value: '6h', label: '6h', ms: 6 * 60 * 60 * 1000 },
+	{ value: '24h', label: '24h', ms: 24 * 60 * 60 * 1000 },
+	{ value: '7d', label: '7d', ms: 7 * 24 * 60 * 60 * 1000 },
+	{ value: '30d', label: '30d', ms: 30 * 24 * 60 * 60 * 1000 },
+];
+
 export default function App() {
 	const [dashKey, setDashKey] = useState(
 		() => localStorage.getItem('DASHBOARD_API_KEY') || '',
@@ -92,6 +87,15 @@ export default function App() {
 	const [range, setRange] = useState('6h');
 	const [status, setStatus] = useState('');
 	const [loading, setLoading] = useState(false);
+
+	const [theme, setTheme] = useState(
+		() => localStorage.getItem('theme') || 'dark',
+	);
+
+	useEffect(() => {
+		document.documentElement.dataset.theme = theme; // sets <html data-theme="...">
+		localStorage.setItem('theme', theme);
+	}, [theme]);
 
 	const [readings, setReadings] = useState([]);
 	const timerRef = useRef(null);
@@ -117,9 +121,10 @@ export default function App() {
 
 	async function loadReadings({ silent = false } = {}) {
 		if (!deviceId) return;
-		const ms = rangeToMs(range);
+		const preset =
+			RANGE_PRESETS.find((p) => p.value === range) || RANGE_PRESETS[2]; // fallback to 1h
 		const to = new Date();
-		const from = new Date(Date.now() - ms);
+		const from = new Date(Date.now() - preset.ms);
 
 		const qs = new URLSearchParams({
 			deviceId,
@@ -206,56 +211,54 @@ export default function App() {
 		[devices],
 	);
 
-	const rangeOptions = useMemo(
-		() => [
-			{ value: '1h', label: 'Last 1 hour' },
-			{ value: '6h', label: 'Last 6 hours' },
-			{ value: '24h', label: 'Last 24 hours' },
-			{ value: '7d', label: 'Last 7 days' },
-		],
-		[],
-	);
+	// const rangeOptions = useMemo(
+	// 	() => [
+	// 		{ value: '1h', label: 'Last 1 hour' },
+	// 		{ value: '6h', label: 'Last 6 hours' },
+	// 		{ value: '24h', label: 'Last 24 hours' },
+	// 		{ value: '7d', label: 'Last 7 days' },
+	// 	],
+	// 	[],
+	// );
 
-	// Dark theme styles to match your UI
+	// Theme-aware styles (uses CSS variables from App.css)
 	const selectStyles = useMemo(
 		() => ({
 			control: (base, state) => ({
 				...base,
-				backgroundColor: '#141c2b',
-				borderColor: state.isFocused
-					? 'rgba(255,255,255,0.25)'
-					: 'rgba(255,255,255,0.12)',
+				backgroundColor: 'var(--control-bg)',
+				borderColor: state.isFocused ? 'var(--focus-border)' : 'var(--border)',
 				boxShadow: 'none',
 				borderRadius: 10,
 				minHeight: 38,
-				color: '#e6edf7',
+				color: 'var(--text)',
 			}),
-			singleValue: (base) => ({ ...base, color: '#e6edf7' }),
-			input: (base) => ({ ...base, color: '#e6edf7' }),
-			placeholder: (base) => ({ ...base, color: '#a9b6cc' }),
+			singleValue: (base) => ({ ...base, color: 'var(--text)' }),
+			input: (base) => ({ ...base, color: 'var(--text)' }),
+			placeholder: (base) => ({ ...base, color: 'var(--muted)' }),
 			menu: (base) => ({
 				...base,
-				backgroundColor: '#0f1624',
-				border: '1px solid rgba(255,255,255,0.10)',
+				backgroundColor: 'var(--card-bg)',
+				border: '1px solid var(--border-soft)',
 				borderRadius: 12,
 				overflow: 'hidden',
 			}),
 			option: (base, state) => ({
 				...base,
 				backgroundColor: state.isSelected
-					? 'rgba(255,255,255,0.10)'
+					? 'var(--kpi-bg)'
 					: state.isFocused
-						? 'rgba(255,255,255,0.06)'
+						? 'var(--row-hover)'
 						: 'transparent',
-				color: '#e6edf7',
+				color: 'var(--text)',
 				cursor: 'pointer',
 			}),
 			indicatorSeparator: (base) => ({
 				...base,
-				backgroundColor: 'rgba(255,255,255,0.12)',
+				backgroundColor: 'var(--border)',
 			}),
-			dropdownIndicator: (base) => ({ ...base, color: '#a9b6cc' }),
-			clearIndicator: (base) => ({ ...base, color: '#a9b6cc' }),
+			dropdownIndicator: (base) => ({ ...base, color: 'var(--muted)' }),
+			clearIndicator: (base) => ({ ...base, color: 'var(--muted)' }),
 			menuPortal: (base) => ({ ...base, zIndex: 9999 }), // prevents clipping under sticky header
 		}),
 		[],
@@ -284,6 +287,15 @@ export default function App() {
 					</div>
 				</div>
 
+				<button
+					className="btn"
+					type="button"
+					onClick={() => setTheme((t) => (t === 'dark' ? 'light' : 'dark'))}
+					title="Toggle theme"
+				>
+					{theme === 'dark' ? 'Light' : 'Dark'}
+				</button>
+
 				<div className="controls">
 					<label className="control">
 						<span>Device</span>
@@ -299,7 +311,7 @@ export default function App() {
 						/>
 					</label>
 
-					<label className="control">
+					{/* <label className="control">
 						<span>Range</span>
 						<Select
 							styles={selectStyles}
@@ -310,7 +322,31 @@ export default function App() {
 							isSearchable={false}
 							menuPortalTarget={document.body}
 						/>
-					</label>
+					</label> */}
+
+					<div className="control">
+						<span>Range</span>
+
+						<div
+							className="rangeGroup"
+							role="group"
+							aria-label="Select time range"
+						>
+							{RANGE_PRESETS.map((p) => (
+								<button
+									key={p.value}
+									type="button"
+									className={`rangeBtn ${range === p.value ? 'active' : ''}`}
+									onClick={() => setRange(p.value)}
+									disabled={!dashKey}
+									aria-pressed={range === p.value}
+									title={`Show ${p.label} of data`}
+								>
+									{p.label}
+								</button>
+							))}
+						</div>
+					</div>
 
 					<button
 						className="btn"
@@ -320,7 +356,6 @@ export default function App() {
 					>
 						{loading ? 'Loading…' : 'Refresh'}
 					</button>
-
 					<div className="status">{status}</div>
 				</div>
 			</header>
