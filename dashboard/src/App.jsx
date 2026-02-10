@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
-	LineChart,
+	ComposedChart,
 	Line,
+	Area,
 	XAxis,
 	YAxis,
 	Tooltip,
@@ -30,6 +31,90 @@ function fmt1(x) {
 	return typeof x === 'number' ? x.toFixed(1) : '—';
 }
 
+function toNumberOrNull(v) {
+	return typeof v === 'number' && Number.isFinite(v) ? v : null;
+}
+
+function bucketForRange(rangeValue) {
+	// must match backend parseBucket(): only minutes (m) and hours (h)
+	switch (rangeValue) {
+		case '15m':
+			return '1m';
+		case '30m':
+			return '1m';
+		case '1h':
+			return '2m';
+		case '6h':
+			return '10m';
+		case '24h':
+			return '30m';
+		case '7d':
+			return '3h';
+		case '30d':
+			return '6h';
+		default:
+			return '10m';
+	}
+}
+
+function formatTimeTick(ms, spanMs) {
+	// show date when the visible range is large
+	const d = new Date(ms);
+	const showDate = spanMs >= 48 * 60 * 60 * 1000; // >= 48h
+	return showDate
+		? d.toLocaleString(undefined, {
+				month: '2-digit',
+				day: '2-digit',
+				hour: '2-digit',
+				minute: '2-digit',
+			})
+		: d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+}
+
+function RangeTooltip({ active, payload, label, unit, title, dataKey }) {
+	if (!active || !payload?.length) return null;
+	const p = payload[0]?.payload;
+	if (!p) return null;
+
+	const avg = p[`${dataKey}Avg`];
+	const min = p[`${dataKey}Min`];
+	const max = p[`${dataKey}Max`];
+
+	return (
+		<div
+			style={{
+				background: 'rgba(10, 12, 16, 0.75)',
+				border: '1px solid rgba(255,255,255,0.12)',
+				backdropFilter: 'blur(10px) saturate(160%)',
+				WebkitBackdropFilter: 'blur(10px) saturate(160%)',
+				borderRadius: 12,
+				padding: '10px 12px',
+				color: 'var(--text)',
+				boxShadow: 'var(--shadow)',
+			}}
+		>
+			<div style={{ fontWeight: 600, marginBottom: 6 }}>{title}</div>
+			<div style={{ opacity: 0.8, fontSize: 12, marginBottom: 8 }}>
+				{new Date(label).toLocaleString()}
+			</div>
+			<div style={{ display: 'grid', gap: 4, fontSize: 13 }}>
+				<div>
+					<span style={{ opacity: 0.8 }}>Avg:</span> {fmt1(avg)}
+					{unit ?? ''}
+				</div>
+				<div>
+					<span style={{ opacity: 0.8 }}>Min:</span> {fmt1(min)}
+					{unit ?? ''}
+				</div>
+				<div>
+					<span style={{ opacity: 0.8 }}>Max:</span> {fmt1(max)}
+					{unit ?? ''}
+				</div>
+			</div>
+		</div>
+	);
+}
+
 function KpiCard({ label, value, sub }) {
 	return (
 		<div className="kpi">
@@ -41,34 +126,78 @@ function KpiCard({ label, value, sub }) {
 }
 
 function ChartCard({ title, data, dataKey, unit }) {
+	const avgKey = `${dataKey}Avg`;
+	const minKey = `${dataKey}Min`;
+	const rangeKey = `${dataKey}Range`;
+
+	const spanMs = useMemo(() => {
+		if (!data?.length) return 0;
+		const a = data[0]?.x;
+		const b = data[data.length - 1]?.x;
+		return typeof a === 'number' && typeof b === 'number'
+			? Math.max(0, b - a)
+			: 0;
+	}, [data]);
+
 	return (
 		<section className="card">
 			<div className="cardTitle">{title}</div>
 			<div className="chartWrap">
 				<ResponsiveContainer width="100%" height="100%">
-					<LineChart
+					<ComposedChart
 						data={data}
 						syncId="room-monitor" // ✅ same id across all charts
-						syncMethod="index" // (default) works since all charts share chartData
+						syncMethod="value" // sync by timestamp (handles missing points/gaps)
 					>
 						<CartesianGrid strokeDasharray="3 3" opacity={0.2} />
-						<XAxis dataKey="t" tick={{ fontSize: 12 }} minTickGap={24} />
+						<XAxis
+							dataKey="x"
+							type="number"
+							scale="time"
+							domain={['dataMin', 'dataMax']}
+							tick={{ fontSize: 12 }}
+							minTickGap={24}
+							tickFormatter={(ms) => formatTimeTick(ms, spanMs)}
+						/>
 						<YAxis tick={{ fontSize: 12 }} width={42} />
 						<Tooltip
-							formatter={(v) => [`${fmt1(v)}${unit ?? ''}`, title]}
-							labelFormatter={(label) => `Time: ${label}`}
-							cursor={{ opacity: 0.2 }} // optional: makes the synced hover line more visible
+							content={
+								<RangeTooltip title={title} unit={unit} dataKey={dataKey} />
+							}
+							cursor={{ opacity: 0.2 }}
 						/>
+						{/* range band: min + (max-min) stacked */}
+						<Area
+							type="monotone"
+							dataKey={minKey}
+							stackId="band"
+							stroke="none"
+							fill="transparent"
+							isAnimationActive={false}
+							connectNulls
+						/>
+						<Area
+							type="monotone"
+							dataKey={rangeKey}
+							stackId="band"
+							stroke="none"
+							fill={LINE_COLORS[dataKey]}
+							fillOpacity={0.18}
+							isAnimationActive={false}
+							connectNulls
+						/>
+						{/* avg line */}
 						<Line
 							type="monotone"
-							dataKey={dataKey}
+							dataKey={avgKey}
 							dot={false}
 							stroke={LINE_COLORS[dataKey]}
-							activeDot={{ r: 5 }} // ✅ visible highlight on hover (and synced charts)
+							activeDot={{ r: 5 }}
 							strokeWidth={2}
 							isAnimationActive={false}
+							connectNulls
 						/>
-					</LineChart>
+					</ComposedChart>
 				</ResponsiveContainer>
 			</div>
 		</section>
@@ -140,6 +269,9 @@ export default function App() {
 			limit: '3000',
 		});
 
+		const bucket = bucketForRange(range);
+		if (bucket) qs.set('bucket', bucket);
+
 		if (!silent) setLoading(true);
 		setStatus(silent ? '' : 'Fetching readings…');
 		try {
@@ -187,18 +319,47 @@ export default function App() {
 	const chartData = useMemo(() => {
 		const normalized = readings.map((r) => {
 			const d = new Date(r.ts);
+			const ms = d.getTime();
+
 			return {
 				ts: r.ts,
-				t: d.toLocaleTimeString(),
-				temperature: r.temperature,
-				humidity: r.humidity,
-				aqi: r.aqi,
+				x: ms,
+
+				// Aggregated response (preferred). Fallback to raw fields if backend returns raw.
+				temperatureAvg: toNumberOrNull(r.temperatureAvg ?? r.temperature),
+				temperatureMin: toNumberOrNull(r.temperatureMin ?? r.temperature),
+				temperatureMax: toNumberOrNull(r.temperatureMax ?? r.temperature),
+				temperatureRange: toNumberOrNull(r.temperatureRange ?? 0),
+
+				humidityAvg: toNumberOrNull(r.humidityAvg ?? r.humidity),
+				humidityMin: toNumberOrNull(r.humidityMin ?? r.humidity),
+				humidityMax: toNumberOrNull(r.humidityMax ?? r.humidity),
+				humidityRange: toNumberOrNull(r.humidityRange ?? 0),
+
+				aqiAvg: toNumberOrNull(r.aqiAvg ?? r.aqi),
+				aqiMin: toNumberOrNull(r.aqiMin ?? r.aqi),
+				aqiMax: toNumberOrNull(r.aqiMax ?? r.aqi),
+				aqiRange: toNumberOrNull(r.aqiRange ?? 0),
 			};
 		});
+
 		return downsample(normalized, 900);
 	}, [readings]);
 
 	const latest = readings.length ? readings[readings.length - 1] : null;
+	const isAggregated =
+		!!latest && Object.prototype.hasOwnProperty.call(latest, 'temperatureAvg');
+	const latestTemperature = latest
+		? isAggregated
+			? latest.temperatureAvg
+			: latest.temperature
+		: null;
+	const latestHumidity = latest
+		? isAggregated
+			? latest.humidityAvg
+			: latest.humidity
+		: null;
+	const latestAqi = latest ? (isAggregated ? latest.aqiAvg : latest.aqi) : null;
 	const latestTs = latest?.ts
 		? new Date(latest.ts).toLocaleString('en-GB')
 		: '—';
@@ -207,9 +368,13 @@ export default function App() {
 		const rows = readings.slice(-25).reverse();
 		return rows.map((r) => ({
 			ts: new Date(r.ts).toLocaleString(),
-			temperature: r.temperature,
-			humidity: r.humidity,
-			aqi: r.aqi,
+			temperature: Object.prototype.hasOwnProperty.call(r, 'temperatureAvg')
+				? r.temperatureAvg
+				: r.temperature,
+			humidity: Object.prototype.hasOwnProperty.call(r, 'humidityAvg')
+				? r.humidityAvg
+				: r.humidity,
+			aqi: Object.prototype.hasOwnProperty.call(r, 'aqiAvg') ? r.aqiAvg : r.aqi,
 		}));
 	}, [readings]);
 
@@ -375,17 +540,17 @@ export default function App() {
 				<section className="card kpis">
 					<KpiCard
 						label="Temperature"
-						value={latest ? `${fmt1(latest.temperature)} °C` : '—'}
+						value={latest ? `${fmt1(latestTemperature)} °C` : '—'}
 						sub="latest in range"
 					/>
 					<KpiCard
 						label="Humidity"
-						value={latest ? `${fmt1(latest.humidity)} %` : '—'}
+						value={latest ? `${fmt1(latestHumidity)} %` : '—'}
 						sub="latest in range"
 					/>
 					<KpiCard
 						label="AQI"
-						value={latest ? `${fmt1(latest.aqi)}` : '—'}
+						value={latest ? `${fmt1(latestAqi)}` : '—'}
 						sub="latest in range"
 					/>
 					<KpiCard label="Timestamp" value={latestTs} sub="local time" />
