@@ -83,7 +83,7 @@ function RangeTooltip({ active, payload, label, unit, title, dataKey }) {
 	return (
 		<div
 			style={{
-				background: 'rgba(10, 12, 16, 0.75)',
+				background: 'var(--hover-bg)',
 				border: '1px solid rgba(255,255,255,0.12)',
 				backdropFilter: 'blur(10px) saturate(160%)',
 				WebkitBackdropFilter: 'blur(10px) saturate(160%)',
@@ -95,7 +95,7 @@ function RangeTooltip({ active, payload, label, unit, title, dataKey }) {
 		>
 			<div style={{ fontWeight: 600, marginBottom: 6 }}>{title}</div>
 			<div style={{ opacity: 0.8, fontSize: 12, marginBottom: 8 }}>
-				{new Date(label).toLocaleString()}
+				{new Date(label).toLocaleString('en-GB')}
 			</div>
 			<div style={{ display: 'grid', gap: 4, fontSize: 13 }}>
 				<div>
@@ -140,7 +140,7 @@ function ChartCard({ title, data, dataKey, unit }) {
 	}, [data]);
 
 	return (
-		<section className="card">
+		<section className="card chartCard">
 			<div className="cardTitle">{title}</div>
 			<div className="chartWrap">
 				<ResponsiveContainer width="100%" height="100%">
@@ -364,19 +364,19 @@ export default function App() {
 		? new Date(latest.ts).toLocaleString('en-GB')
 		: '—';
 
-	const tableRows = useMemo(() => {
-		const rows = readings.slice(-25).reverse();
-		return rows.map((r) => ({
-			ts: new Date(r.ts).toLocaleString(),
-			temperature: Object.prototype.hasOwnProperty.call(r, 'temperatureAvg')
-				? r.temperatureAvg
-				: r.temperature,
-			humidity: Object.prototype.hasOwnProperty.call(r, 'humidityAvg')
-				? r.humidityAvg
-				: r.humidity,
-			aqi: Object.prototype.hasOwnProperty.call(r, 'aqiAvg') ? r.aqiAvg : r.aqi,
-		}));
-	}, [readings]);
+	// const tableRows = useMemo(() => {
+	// 	const rows = readings.slice(-25).reverse();
+	// 	return rows.map((r) => ({
+	// 		ts: new Date(r.ts).toLocaleString(),
+	// 		temperature: Object.prototype.hasOwnProperty.call(r, 'temperatureAvg')
+	// 			? r.temperatureAvg
+	// 			: r.temperature,
+	// 		humidity: Object.prototype.hasOwnProperty.call(r, 'humidityAvg')
+	// 			? r.humidityAvg
+	// 			: r.humidity,
+	// 		aqi: Object.prototype.hasOwnProperty.call(r, 'aqiAvg') ? r.aqiAvg : r.aqi,
+	// 	}));
+	// }, [readings]);
 
 	const deviceOptions = useMemo(
 		() => devices.map((d) => ({ value: d, label: d })),
@@ -570,7 +570,7 @@ export default function App() {
 				/>
 				<ChartCard title="AQI" data={chartData} dataKey="aqi" unit="" />
 
-				<section className="card tableCard">
+				{/* <section className="card tableCard">
 					<div className="cardTitle">Recent readings</div>
 					<div className="tableWrap">
 						<table>
@@ -594,7 +594,7 @@ export default function App() {
 							</tbody>
 						</table>
 					</div>
-				</section>
+				</section> */}
 			</main>
 		</div>
 	);

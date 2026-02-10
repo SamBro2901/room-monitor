@@ -18,6 +18,7 @@
 
   --text: rgba(10, 14, 22, 0.92);
   --muted: rgba(20, 28, 44, 0.62);
+  --hover-bg: rgba(226, 226, 226, 0.75);
 
   /* Glass surfaces */
   --glass: rgba(255, 255, 255, 0.58);
@@ -58,6 +59,7 @@
 
   --text: rgba(236, 242, 255, 0.92);
   --muted: rgba(202, 214, 240, 0.68);
+  --hover-bg: rgba(10, 12, 16, 0.75);
 
   --glass: rgba(16, 22, 36, 0.58);
   --glass-strong: rgba(16, 22, 36, 0.72);
@@ -267,6 +269,11 @@ input:focus,
   -webkit-backdrop-filter: blur(18px) saturate(170%);
 
   transition: transform 160ms ease, box-shadow 160ms ease;
+}
+
+/* Make chart cards occupy full grid width and stack vertically */
+.chartCard {
+  grid-column: 1 / -1;
 }
 
 .card::before {
