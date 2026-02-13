@@ -84,7 +84,7 @@ function RangeTooltip({ active, payload, label, unit, title, dataKey }) {
 		<div
 			style={{
 				position: 'relative',
-				background: 'var(--hover-bg)', // var(--hover-bg)
+				background: 'var(--hover-bg)',
 				border: '1px solid rgba(139, 92, 246, 0.4)',
 				backdropFilter: 'blur(10px)',
 				WebkitBackdropFilter: 'blur(10px)',
@@ -95,12 +95,12 @@ function RangeTooltip({ active, payload, label, unit, title, dataKey }) {
 				fontFamily: "'Sora', sans-serif",
 			}}
 		>
-			<div style={{ fontWeight: 600, marginBottom: 6, color: '#ffffff' }}>
+			<div style={{ fontWeight: 600, marginBottom: 6, color: 'var(--text)' }}>
 				{title}
 			</div>
 			<div
 				style={{
-					color: 'rgba(255,255,255,0.6)',
+					color: 'var(--hover-ts)',
 					fontSize: 12,
 					marginBottom: 8,
 					fontFamily: "'JetBrains Mono', monospace",
@@ -119,10 +119,10 @@ function RangeTooltip({ active, payload, label, unit, title, dataKey }) {
 							display: 'inline-block',
 						}}
 					/>
-					<span style={{ color: 'rgba(255,255,255,0.7)' }}>Min:</span>
+					<span style={{ color: 'var(--hover-txt)' }}>Min:</span>
 					<span
 						style={{
-							color: 'rgba(255,255,255,0.9)',
+							color: 'var(--hover-value)',
 							fontFamily: "'JetBrains Mono', monospace",
 						}}
 					>
@@ -140,7 +140,7 @@ function RangeTooltip({ active, payload, label, unit, title, dataKey }) {
 							display: 'inline-block',
 						}}
 					/>
-					<span style={{ color: 'rgba(255,255,255,0.7)' }}>Avg:</span>
+					<span style={{ color: 'var(--hover-txt)' }}>Avg:</span>
 					<span
 						style={{
 							color: LINE_COLORS[dataKey],
@@ -163,10 +163,10 @@ function RangeTooltip({ active, payload, label, unit, title, dataKey }) {
 							display: 'inline-block',
 						}}
 					/>
-					<span style={{ color: 'rgba(255,255,255,0.7)' }}>Max:</span>
+					<span style={{ color: 'var(--hover-txt)' }}>Max:</span>
 					<span
 						style={{
-							color: 'rgba(255,255,255,0.9)',
+							color: 'var(--hover-value)',
 							fontFamily: "'JetBrains Mono', monospace",
 						}}
 					>
@@ -594,7 +594,9 @@ export default function App() {
 					--page-bg: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
 					--card-bg: rgba(30, 27, 75, 0.5);
 					--hover-bg: rgba(15, 23, 42, 0.95);
+					--hover-ts: rgba(255,255,255,0.6);
 					--hover-txt: rgba(255,255,255,0.7);
+					--hover-value: rgba(255,255,255,0.9);
 					--card-border: rgba(139, 92, 246, 0.3);
 					--text: #ffffff;
 					--muted: rgba(255,255,255,0.5);
@@ -619,7 +621,9 @@ export default function App() {
 					--page-bg: linear-gradient(135deg, #e0e7ff 0%, #f0f4ff 100%);
 					--card-bg: rgba(255, 255, 255, 0.6);
 					--hover-bg: rgba(230, 228, 228, 0.97);
+					--hover-ts: rgba(30,27,75,0.6);
 					--hover-txt: rgba(30,27,75,0.7);
+					--hover-value: rgba(30,27,75,0.9);
 					--card-border: rgba(99, 102, 241, 0.25);
 					--text: #1e1b4b;
 					--muted: rgba(30,27,75,0.5);
