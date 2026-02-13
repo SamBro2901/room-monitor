@@ -115,7 +115,7 @@ function RangeTooltip({ active, payload, label, unit, title, dataKey }) {
 							width: 8,
 							height: 8,
 							borderRadius: '50%',
-							background: 'rgba(255,255,255,0.4)',
+							background: 'var(--hover-dot)',
 							display: 'inline-block',
 						}}
 					/>
@@ -159,7 +159,7 @@ function RangeTooltip({ active, payload, label, unit, title, dataKey }) {
 							width: 8,
 							height: 8,
 							borderRadius: '50%',
-							background: 'rgba(255,255,255,0.4)',
+							background: 'var(--hover-dot)',
 							display: 'inline-block',
 						}}
 					/>
@@ -594,6 +594,7 @@ export default function App() {
 					--page-bg: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
 					--card-bg: rgba(30, 27, 75, 0.5);
 					--hover-bg: rgba(15, 23, 42, 0.95);
+					--hover-dot: rgba(255,255,255,0.4);
 					--hover-ts: rgba(255,255,255,0.6);
 					--hover-txt: rgba(255,255,255,0.7);
 					--hover-value: rgba(255,255,255,0.9);
@@ -610,7 +611,6 @@ export default function App() {
 					--shadow: 0 8px 32px rgba(0,0,0,0.4);
 					--kpi-bg: rgba(139,92,246,0.15);
 					--row-hover: rgba(139,92,246,0.1);
-					--hover-bg: rgba(15, 23, 42, 0.95);
 					--btn-bg: rgba(139, 92, 246, 0.2);
 					--btn-hover: rgba(139, 92, 246, 0.35);
 					--btn-active-bg: linear-gradient(135deg, #8b5cf6, #6366f1);
@@ -620,7 +620,8 @@ export default function App() {
 				[data-theme="light"] {
 					--page-bg: linear-gradient(135deg, #e0e7ff 0%, #f0f4ff 100%);
 					--card-bg: rgba(255, 255, 255, 0.6);
-					--hover-bg: rgba(230, 228, 228, 0.97);
+					--hover-bg: rgba(230, 228, 228, 0.95);
+					--hover-dot: rgba(30,27,75,0.4);
 					--hover-ts: rgba(30,27,75,0.6);
 					--hover-txt: rgba(30,27,75,0.7);
 					--hover-value: rgba(30,27,75,0.9);
@@ -637,7 +638,6 @@ export default function App() {
 					--shadow: 0 8px 32px rgba(99,102,241,0.15);
 					--kpi-bg: rgba(99,102,241,0.1);
 					--row-hover: rgba(99,102,241,0.08);
-					--hover-bg: rgba(255,255,255,0.97);
 					--btn-bg: rgba(99, 102, 241, 0.15);
 					--btn-hover: rgba(99, 102, 241, 0.28);
 					--btn-active-bg: linear-gradient(135deg, #6366f1, #8b5cf6);
@@ -926,7 +926,6 @@ export default function App() {
 					display: grid;
 					grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
 					gap: 1px;
-					overflow: hidden;
 					padding: 0;
 				}
 
@@ -1020,6 +1019,7 @@ export default function App() {
 					display: flex;
 					align-items: center;
 					gap: 8px;
+					overflow: visible;
 				}
 
 				.kpiRangeNum {
@@ -1034,6 +1034,22 @@ export default function App() {
 					flex: 1;
 					height: 3px;
 					border-radius: 2px;
+					position: relative;
+					overflow: visible;
+					margin: 6px 0;
+				}
+
+				.kpiRangeDot {
+					position: absolute;
+					top: 50%;
+					width: 9px;
+					height: 9px;
+					border-radius: 50%;
+					background: #ffffff;
+					border: 2px solid currentColor;
+					transform: translate(-50%, -50%);
+					box-shadow: 0 0 6px currentColor;
+					transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 				}
 
 				/* ── Chart cards ── */
