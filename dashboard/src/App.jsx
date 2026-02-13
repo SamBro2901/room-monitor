@@ -1123,7 +1123,7 @@ export default function App() {
 						disabled={loading || !dashKey}
 						title="Fetch latest data"
 					>
-						{loading ? 'Loading…' : 'Refresh'}
+						{/* {loading ? 'Loading…' : 'Refresh'} */}
 					</button>
 					<div className="status">{status}</div>
 					<button
