@@ -582,6 +582,7 @@ export default function App() {
 					--page-bg: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
 					--card-bg: rgba(30, 27, 75, 0.5);
 					--hover-bg: rgba(15, 23, 42, 0.95);
+					--hover-txt: rgba(255,255,255,0.7);
 					--card-border: rgba(139, 92, 246, 0.3);
 					--text: #ffffff;
 					--muted: rgba(255,255,255,0.5);
@@ -606,6 +607,7 @@ export default function App() {
 					--page-bg: linear-gradient(135deg, #e0e7ff 0%, #f0f4ff 100%);
 					--card-bg: rgba(255, 255, 255, 0.6);
 					--hover-bg: rgba(230, 228, 228, 0.97);
+					--hover-txt: rgba(30,27,75,0.7);
 					--card-border: rgba(99, 102, 241, 0.25);
 					--text: #1e1b4b;
 					--muted: rgba(30,27,75,0.5);
