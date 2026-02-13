@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
 	ComposedChart,
@@ -273,7 +274,18 @@ function KpiCard({ metaKey, value, min, max }) {
 							style={{
 								background: `linear-gradient(90deg, ${color}40, ${color})`,
 							}}
-						/>
+						>
+							{value !== null && (
+								<div
+									className="kpiRangeDot"
+									style={{
+										left: `${Math.min(100, Math.max(0, ((value - min) / (max - min)) * 100))}%`,
+										borderColor: color,
+										color,
+									}}
+								/>
+							)}
+						</div>
 						<span className="kpiRangeNum">{fmt1(max)}</span>
 					</div>
 				</div>
