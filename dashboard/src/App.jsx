@@ -61,13 +61,13 @@ function formatTimeTick(ms, spanMs) {
 	const d = new Date(ms);
 	const showDate = spanMs >= 48 * 60 * 60 * 1000; // >= 48h
 	return showDate
-		? d.toLocaleString(undefined, {
+		? d.toLocaleString('en-GB', {
 				month: '2-digit',
 				day: '2-digit',
 				hour: '2-digit',
 				minute: '2-digit',
 			})
-		: d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+		: d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
 }
 
 function RangeTooltip({ active, payload, label, unit, title, dataKey }) {
@@ -114,6 +114,27 @@ function RangeTooltip({ active, payload, label, unit, title, dataKey }) {
 							width: 8,
 							height: 8,
 							borderRadius: '50%',
+							background: 'rgba(255,255,255,0.4)',
+							display: 'inline-block',
+						}}
+					/>
+					<span style={{ color: 'rgba(255,255,255,0.7)' }}>Min:</span>
+					<span
+						style={{
+							color: 'rgba(255,255,255,0.9)',
+							fontFamily: "'JetBrains Mono', monospace",
+						}}
+					>
+						{fmt1(min)}
+						{unit ?? ''}
+					</span>
+				</div>
+				<div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+					<span
+						style={{
+							width: 8,
+							height: 8,
+							borderRadius: '50%',
 							background: LINE_COLORS[dataKey],
 							display: 'inline-block',
 						}}
@@ -130,27 +151,7 @@ function RangeTooltip({ active, payload, label, unit, title, dataKey }) {
 						{unit ?? ''}
 					</span>
 				</div>
-				<div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-					<span
-						style={{
-							width: 8,
-							height: 8,
-							borderRadius: '50%',
-							background: 'rgba(255,255,255,0.4)',
-							display: 'inline-block',
-						}}
-					/>
-					<span style={{ color: 'rgba(255,255,255,0.7)' }}>Min:</span>
-					<span
-						style={{
-							color: 'rgba(255,255,255,0.9)',
-							fontFamily: "'JetBrains Mono', monospace",
-						}}
-					>
-						{fmt1(min)}
-						{unit ?? ''}
-					</span>
-				</div>
+
 				<div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
 					<span
 						style={{
@@ -542,25 +543,32 @@ export default function App() {
 	// min/max across the selected time range (for KPI range bars)
 	const rangeStats = useMemo(() => {
 		if (!chartData.length) return { temperature: {}, humidity: {}, aqi: {} };
-		const temps = chartData
-			.map((d) => d.temperatureAvg)
+		const minTemps = chartData
+			.map((d) => d.temperatureMin)
 			.filter((v) => v !== null);
-		const humids = chartData
-			.map((d) => d.humidityAvg)
+		const maxTemps = chartData
+			.map((d) => d.temperatureMax)
 			.filter((v) => v !== null);
-		const aqis = chartData.map((d) => d.aqiAvg).filter((v) => v !== null);
+		const maxHumids = chartData
+			.map((d) => d.humidityMax)
+			.filter((v) => v !== null);
+		const minHumids = chartData
+			.map((d) => d.humidityMin)
+			.filter((v) => v !== null);
+		const minAqis = chartData.map((d) => d.aqiMin).filter((v) => v !== null);
+		const maxAqis = chartData.map((d) => d.aqiMax).filter((v) => v !== null);
 		return {
 			temperature: {
-				min: temps.length ? Math.min(...temps) : null,
-				max: temps.length ? Math.max(...temps) : null,
+				min: minTemps.length ? Math.min(...minTemps) : null,
+				max: maxTemps.length ? Math.max(...maxTemps) : null,
 			},
 			humidity: {
-				min: humids.length ? Math.min(...humids) : null,
-				max: humids.length ? Math.max(...humids) : null,
+				min: minHumids.length ? Math.min(...minHumids) : null,
+				max: maxHumids.length ? Math.max(...maxHumids) : null,
 			},
 			aqi: {
-				min: aqis.length ? Math.min(...aqis) : null,
-				max: aqis.length ? Math.max(...aqis) : null,
+				min: minAqis.length ? Math.min(...minAqis) : null,
+				max: maxAqis.length ? Math.max(...maxAqis) : null,
 			},
 		};
 	}, [chartData]);
