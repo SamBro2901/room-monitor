@@ -83,7 +83,7 @@ function RangeTooltip({ active, payload, label, unit, title, dataKey }) {
 		<div
 			style={{
 				position: 'relative',
-				background: 'rgba(15, 23, 42, 0.95)',
+				background: 'var(--hover-bg)', // var(--hover-bg)
 				border: '1px solid rgba(139, 92, 246, 0.4)',
 				backdropFilter: 'blur(10px)',
 				WebkitBackdropFilter: 'blur(10px)',
@@ -581,6 +581,7 @@ export default function App() {
 				:root {
 					--page-bg: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
 					--card-bg: rgba(30, 27, 75, 0.5);
+					--hover-bg: rgba(15, 23, 42, 0.95);
 					--card-border: rgba(139, 92, 246, 0.3);
 					--text: #ffffff;
 					--muted: rgba(255,255,255,0.5);
@@ -604,6 +605,7 @@ export default function App() {
 				[data-theme="light"] {
 					--page-bg: linear-gradient(135deg, #e0e7ff 0%, #f0f4ff 100%);
 					--card-bg: rgba(255, 255, 255, 0.6);
+					--hover-bg: rgba(230, 228, 228, 0.97);
 					--card-border: rgba(99, 102, 241, 0.25);
 					--text: #1e1b4b;
 					--muted: rgba(30,27,75,0.5);
