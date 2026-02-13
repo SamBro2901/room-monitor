@@ -620,7 +620,7 @@ export default function App() {
 				[data-theme="light"] {
 					--page-bg: linear-gradient(135deg, #e0e7ff 0%, #f0f4ff 100%);
 					--card-bg: rgba(255, 255, 255, 0.6);
-					--hover-bg: rgba(230, 228, 228, 0.95);
+					--hover-bg: rgba(245, 245, 245, 0.95);
 					--hover-dot: rgba(30,27,75,0.4);
 					--hover-ts: rgba(30,27,75,0.6);
 					--hover-txt: rgba(30,27,75,0.7);
