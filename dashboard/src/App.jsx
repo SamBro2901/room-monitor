@@ -10,12 +10,11 @@ import {
 	ResponsiveContainer,
 } from 'recharts';
 import './App.css';
-import Select from 'react-select';
 
 const LINE_COLORS = {
-	temperature: '#4C7DFF',
-	humidity: '#2FE4A8',
-	aqi: '#FF4D6D',
+	temperature: '#fb7185',
+	humidity: '#60a5fa',
+	aqi: '#34d399',
 };
 
 // simple downsample so charts stay snappy
@@ -83,44 +82,201 @@ function RangeTooltip({ active, payload, label, unit, title, dataKey }) {
 	return (
 		<div
 			style={{
-				background: 'var(--hover-bg)',
-				border: '1px solid rgba(255,255,255,0.12)',
-				backdropFilter: 'blur(10px) saturate(160%)',
-				WebkitBackdropFilter: 'blur(10px) saturate(160%)',
+				position: 'relative',
+				background: 'rgba(15, 23, 42, 0.95)',
+				border: '1px solid rgba(139, 92, 246, 0.4)',
+				backdropFilter: 'blur(10px)',
+				WebkitBackdropFilter: 'blur(10px)',
 				borderRadius: 12,
-				padding: '10px 12px',
-				color: 'var(--text)',
-				boxShadow: 'var(--shadow)',
+				padding: '12px 16px',
+				color: '#ffffff',
+				boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
+				fontFamily: "'Sora', sans-serif",
 			}}
 		>
-			<div style={{ fontWeight: 600, marginBottom: 6 }}>{title}</div>
-			<div style={{ opacity: 0.8, fontSize: 12, marginBottom: 8 }}>
+			<div style={{ fontWeight: 600, marginBottom: 6, color: '#ffffff' }}>
+				{title}
+			</div>
+			<div
+				style={{
+					color: 'rgba(255,255,255,0.6)',
+					fontSize: 12,
+					marginBottom: 8,
+					fontFamily: "'JetBrains Mono', monospace",
+				}}
+			>
 				{new Date(label).toLocaleString('en-GB')}
 			</div>
 			<div style={{ display: 'grid', gap: 4, fontSize: 13 }}>
-				<div>
-					<span style={{ opacity: 0.8 }}>Avg:</span> {fmt1(avg)}
-					{unit ?? ''}
+				<div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+					<span
+						style={{
+							width: 8,
+							height: 8,
+							borderRadius: '50%',
+							background: LINE_COLORS[dataKey],
+							display: 'inline-block',
+						}}
+					/>
+					<span style={{ color: 'rgba(255,255,255,0.7)' }}>Avg:</span>
+					<span
+						style={{
+							color: LINE_COLORS[dataKey],
+							fontFamily: "'JetBrains Mono', monospace",
+							fontWeight: 600,
+						}}
+					>
+						{fmt1(avg)}
+						{unit ?? ''}
+					</span>
 				</div>
-				<div>
-					<span style={{ opacity: 0.8 }}>Min:</span> {fmt1(min)}
-					{unit ?? ''}
+				<div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+					<span
+						style={{
+							width: 8,
+							height: 8,
+							borderRadius: '50%',
+							background: 'rgba(255,255,255,0.4)',
+							display: 'inline-block',
+						}}
+					/>
+					<span style={{ color: 'rgba(255,255,255,0.7)' }}>Min:</span>
+					<span
+						style={{
+							color: 'rgba(255,255,255,0.9)',
+							fontFamily: "'JetBrains Mono', monospace",
+						}}
+					>
+						{fmt1(min)}
+						{unit ?? ''}
+					</span>
 				</div>
-				<div>
-					<span style={{ opacity: 0.8 }}>Max:</span> {fmt1(max)}
-					{unit ?? ''}
+				<div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+					<span
+						style={{
+							width: 8,
+							height: 8,
+							borderRadius: '50%',
+							background: 'rgba(255,255,255,0.4)',
+							display: 'inline-block',
+						}}
+					/>
+					<span style={{ color: 'rgba(255,255,255,0.7)' }}>Max:</span>
+					<span
+						style={{
+							color: 'rgba(255,255,255,0.9)',
+							fontFamily: "'JetBrains Mono', monospace",
+						}}
+					>
+						{fmt1(max)}
+						{unit ?? ''}
+					</span>
 				</div>
 			</div>
 		</div>
 	);
 }
 
-function KpiCard({ label, value, sub }) {
+// SVG icons matching MonitoringDashboard palette
+function IconThermometer({ color }) {
+	return (
+		<svg
+			width="20"
+			height="20"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke={color}
+			strokeWidth="2.5"
+			strokeLinecap="round"
+			strokeLinejoin="round"
+		>
+			<path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z" />
+		</svg>
+	);
+}
+function IconDroplets({ color }) {
+	return (
+		<svg
+			width="20"
+			height="20"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke={color}
+			strokeWidth="2.5"
+			strokeLinecap="round"
+			strokeLinejoin="round"
+		>
+			<path d="M7 16.3c2.2 0 4-1.83 4-4.05 0-1.16-.57-2.26-1.71-3.19S7.29 6.75 7 5.3c-.29 1.45-1.14 2.84-2.29 3.76S3 11.1 3 12.25c0 2.22 1.8 4.05 4 4.05z" />
+			<path d="M12.56 6.6A10.97 10.97 0 0 0 14 3.02c.5 2.5 2 4.9 4 6.5s3 3.5 3 5.5a6.98 6.98 0 0 1-11.91 4.97" />
+		</svg>
+	);
+}
+function IconWind({ color }) {
+	return (
+		<svg
+			width="20"
+			height="20"
+			viewBox="0 0 24 24"
+			fill="none"
+			stroke={color}
+			strokeWidth="2.5"
+			strokeLinecap="round"
+			strokeLinejoin="round"
+		>
+			<path d="M17.7 7.7a2.5 2.5 0 1 1 1.8 4.3H2" />
+			<path d="M9.6 4.6A2 2 0 1 1 11 8H2" />
+			<path d="M12.6 19.4A2 2 0 1 0 14 16H2" />
+		</svg>
+	);
+}
+
+const KPI_META = {
+	temperature: {
+		label: 'Temperature',
+		unit: ' °C',
+		color: '#fb7185',
+		Icon: IconThermometer,
+	},
+	humidity: {
+		label: 'Humidity',
+		unit: ' %',
+		color: '#60a5fa',
+		Icon: IconDroplets,
+	},
+	aqi: { label: 'AQI', unit: '', color: '#34d399', Icon: IconWind },
+};
+
+function KpiCard({ metaKey, value, min, max }) {
+	const { label, unit, color, Icon } = KPI_META[metaKey];
+	const hasRange = min !== null && max !== null && min !== max;
+
 	return (
 		<div className="kpi">
-			<div className="kpiLabel">{label}</div>
-			<div className="kpiValue">{value}</div>
-			{sub ? <div className="kpiSub">{sub}</div> : null}
+			<div className="kpiHeader">
+				<div className="kpiIconWrap" style={{ '--kpi-color': color }}>
+					<Icon color={color} />
+				</div>
+				<span className="kpiLabel">{label}</span>
+			</div>
+			<div className="kpiValue" style={{ color }}>
+				{value !== null ? `${fmt1(value)}` : '—'}
+				<span className="kpiUnit">{value !== null ? unit : ''}</span>
+			</div>
+			{hasRange && (
+				<div className="kpiRange">
+					<span className="kpiRangeLabel">Range</span>
+					<div className="kpiRangeBar">
+						<span className="kpiRangeNum">{fmt1(min)}</span>
+						<div
+							className="kpiRangeLine"
+							style={{
+								background: `linear-gradient(90deg, ${color}40, ${color})`,
+							}}
+						/>
+						<span className="kpiRangeNum">{fmt1(max)}</span>
+					</div>
+				</div>
+			)}
 		</div>
 	);
 }
@@ -129,6 +285,7 @@ function ChartCard({ title, data, dataKey, unit }) {
 	const avgKey = `${dataKey}Avg`;
 	const minKey = `${dataKey}Min`;
 	const rangeKey = `${dataKey}Range`;
+	const color = LINE_COLORS[dataKey];
 
 	const spanMs = useMemo(() => {
 		if (!data?.length) return 0;
@@ -141,32 +298,47 @@ function ChartCard({ title, data, dataKey, unit }) {
 
 	return (
 		<section className="card chartCard">
-			<div className="cardTitle">{title}</div>
+			<div className="cardTitle">
+				<span className="cardTitleDot" style={{ background: color }} />
+				{title}
+			</div>
 			<div className="chartWrap">
 				<ResponsiveContainer width="100%" height="100%">
-					<ComposedChart
-						data={data}
-						syncId="room-monitor" // ✅ same id across all charts
-						syncMethod="value" // sync by timestamp (handles missing points/gaps)
-					>
-						<CartesianGrid strokeDasharray="3 3" opacity={0.2} />
+					<ComposedChart data={data} syncId="room-monitor" syncMethod="value">
+						<CartesianGrid
+							strokeDasharray="3 3"
+							stroke="rgba(139, 92, 246, 0.15)"
+						/>
 						<XAxis
 							dataKey="x"
 							type="number"
 							scale="time"
 							domain={['dataMin', 'dataMax']}
-							tick={{ fontSize: 12 }}
+							tick={{
+								fontSize: 12,
+								fill: 'rgba(255,255,255,0.5)',
+								fontFamily: "'JetBrains Mono', monospace",
+							}}
+							stroke="rgba(255,255,255,0.15)"
 							minTickGap={24}
 							tickFormatter={(ms) => formatTimeTick(ms, spanMs)}
 						/>
-						<YAxis tick={{ fontSize: 12 }} width={42} />
+						<YAxis
+							tick={{
+								fontSize: 12,
+								fill: 'rgba(255,255,255,0.5)',
+								fontFamily: "'JetBrains Mono', monospace",
+							}}
+							stroke="rgba(255,255,255,0.15)"
+							width={42}
+						/>
 						<Tooltip
 							content={
 								<RangeTooltip title={title} unit={unit} dataKey={dataKey} />
 							}
-							cursor={{ opacity: 0.2 }}
+							cursor={{ stroke: 'rgba(139,92,246,0.4)', strokeWidth: 1 }}
 						/>
-						{/* range band: min + (max-min) stacked */}
+						{/* range band: min baseline (transparent) + range fill stacked on top */}
 						<Area
 							type="monotone"
 							dataKey={minKey}
@@ -181,19 +353,29 @@ function ChartCard({ title, data, dataKey, unit }) {
 							dataKey={rangeKey}
 							stackId="band"
 							stroke="none"
-							fill={LINE_COLORS[dataKey]}
+							fill={color}
 							fillOpacity={0.18}
 							isAnimationActive={false}
 							connectNulls
 						/>
-						{/* avg line */}
+						{/* avg line — coloured */}
 						<Line
 							type="monotone"
 							dataKey={avgKey}
 							dot={false}
-							stroke={LINE_COLORS[dataKey]}
-							activeDot={{ r: 5 }}
-							strokeWidth={2}
+							stroke={color}
+							activeDot={{ r: 5, fill: color, strokeWidth: 2, stroke: '#fff' }}
+							strokeWidth={2.5}
+							isAnimationActive={false}
+							connectNulls
+						/>
+						{/* overall average — solid white */}
+						<Line
+							type="monotone"
+							dataKey={avgKey}
+							dot={false}
+							stroke="rgba(255,255,255,0.55)"
+							strokeWidth={1.5}
 							isAnimationActive={false}
 							connectNulls
 						/>
@@ -229,7 +411,7 @@ export default function App() {
 	);
 
 	useEffect(() => {
-		document.documentElement.dataset.theme = theme; // sets <html data-theme="...">
+		document.documentElement.dataset.theme = theme;
 		localStorage.setItem('theme', theme);
 	}, [theme]);
 
@@ -238,9 +420,7 @@ export default function App() {
 
 	async function fetchJSON(url) {
 		const res = await fetch(url, {
-			headers: dashKey
-				? { 'x-dashboard-key': dashKey } // or Authorization: `Bearer ${dashKey}`
-				: {},
+			headers: dashKey ? { 'x-dashboard-key': dashKey } : {},
 		});
 		if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
 		return res.json();
@@ -258,7 +438,7 @@ export default function App() {
 	async function loadReadings({ silent = false } = {}) {
 		if (!deviceId) return;
 		const preset =
-			RANGE_PRESETS.find((p) => p.value === range) || RANGE_PRESETS[2]; // fallback to 1h
+			RANGE_PRESETS.find((p) => p.value === range) || RANGE_PRESETS[2];
 		const to = new Date();
 		const from = new Date(Date.now() - preset.ms);
 
@@ -291,21 +471,16 @@ export default function App() {
 		if (!dashKey) {
 			setStatus('Enter Dashboard Key to load data.');
 			setDevices([]);
-			setDeviceId('');
 			setReadings([]);
 			return;
 		}
-		loadDevices().catch((e) => setStatus(`Error: ${e.message}`));
+		loadDevices();
 	}, [dashKey]);
 
-	// reload readings when device or range changes
+	// load readings whenever deviceId or range changes, and start polling
 	useEffect(() => {
-		if (!deviceId) return;
-		loadReadings().catch((e) => setStatus(`Error: ${e.message}`));
-	}, [deviceId, range]);
+		loadReadings();
 
-	// auto-refresh every 30s
-	useEffect(() => {
 		if (timerRef.current) clearInterval(timerRef.current);
 		timerRef.current = setInterval(() => {
 			loadReadings({ silent: true });
@@ -364,85 +539,514 @@ export default function App() {
 		? new Date(latest.ts).toLocaleString('en-GB')
 		: '—';
 
-	// const tableRows = useMemo(() => {
-	// 	const rows = readings.slice(-25).reverse();
-	// 	return rows.map((r) => ({
-	// 		ts: new Date(r.ts).toLocaleString(),
-	// 		temperature: Object.prototype.hasOwnProperty.call(r, 'temperatureAvg')
-	// 			? r.temperatureAvg
-	// 			: r.temperature,
-	// 		humidity: Object.prototype.hasOwnProperty.call(r, 'humidityAvg')
-	// 			? r.humidityAvg
-	// 			: r.humidity,
-	// 		aqi: Object.prototype.hasOwnProperty.call(r, 'aqiAvg') ? r.aqiAvg : r.aqi,
-	// 	}));
-	// }, [readings]);
-
-	const deviceOptions = useMemo(
-		() => devices.map((d) => ({ value: d, label: d })),
-		[devices],
-	);
-
-	// const rangeOptions = useMemo(
-	// 	() => [
-	// 		{ value: '1h', label: 'Last 1 hour' },
-	// 		{ value: '6h', label: 'Last 6 hours' },
-	// 		{ value: '24h', label: 'Last 24 hours' },
-	// 		{ value: '7d', label: 'Last 7 days' },
-	// 	],
-	// 	[],
-	// );
-
-	// Theme-aware styles (uses CSS variables from App.css)
-	const selectStyles = useMemo(
-		() => ({
-			control: (base, state) => ({
-				...base,
-				backgroundColor: 'var(--control-bg)',
-				backdropFilter: 'blur(14px) saturate(160%)',
-				WebkitBackdropFilter: 'blur(14px) saturate(160%)',
-				borderColor: state.isFocused ? 'var(--focus-border)' : 'var(--border)',
-				boxShadow: state.isFocused ? 'var(--glow)' : 'none',
-				borderRadius: 10,
-				minHeight: 38,
-				color: 'var(--text)',
-			}),
-			singleValue: (base) => ({ ...base, color: 'var(--text)' }),
-			input: (base) => ({ ...base, color: 'var(--text)' }),
-			placeholder: (base) => ({ ...base, color: 'var(--muted)' }),
-			menu: (base) => ({
-				...base,
-				backgroundColor: 'var(--card-bg)',
-				border: '1px solid var(--border-soft)',
-				borderRadius: 12,
-				overflow: 'hidden',
-				backdropFilter: 'blur(16px) saturate(170%)',
-				WebkitBackdropFilter: 'blur(16px) saturate(170%)',
-				boxShadow: 'var(--shadow)',
-			}),
-			option: (base, state) => ({
-				...base,
-				backgroundColor: state.isSelected
-					? 'var(--kpi-bg)'
-					: state.isFocused
-						? 'var(--row-hover)'
-						: 'transparent',
-				color: 'var(--text)',
-				cursor: 'pointer',
-			}),
-			indicatorSeparator: (base) => ({
-				...base,
-				backgroundColor: 'var(--border)',
-			}),
-			dropdownIndicator: (base) => ({ ...base, color: 'var(--muted)' }),
-			clearIndicator: (base) => ({ ...base, color: 'var(--muted)' }),
-			menuPortal: (base) => ({ ...base, zIndex: 9999 }), // prevents clipping under sticky header
-		}),
-		[],
-	);
+	// min/max across the selected time range (for KPI range bars)
+	const rangeStats = useMemo(() => {
+		if (!chartData.length) return { temperature: {}, humidity: {}, aqi: {} };
+		const temps = chartData
+			.map((d) => d.temperatureAvg)
+			.filter((v) => v !== null);
+		const humids = chartData
+			.map((d) => d.humidityAvg)
+			.filter((v) => v !== null);
+		const aqis = chartData.map((d) => d.aqiAvg).filter((v) => v !== null);
+		return {
+			temperature: {
+				min: temps.length ? Math.min(...temps) : null,
+				max: temps.length ? Math.max(...temps) : null,
+			},
+			humidity: {
+				min: humids.length ? Math.min(...humids) : null,
+				max: humids.length ? Math.max(...humids) : null,
+			},
+			aqi: {
+				min: aqis.length ? Math.min(...aqis) : null,
+				max: aqis.length ? Math.max(...aqis) : null,
+			},
+		};
+	}, [chartData]);
 
 	return (
 		<div className="page">
+			<style>{`
+				@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+				:root {
+					--page-bg: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+					--card-bg: rgba(30, 27, 75, 0.5);
+					--card-border: rgba(139, 92, 246, 0.3);
+					--text: #ffffff;
+					--muted: rgba(255,255,255,0.5);
+					--topbar-bg: rgba(15, 23, 42, 0.85);
+					--topbar-border: rgba(139, 92, 246, 0.25);
+					--control-bg: rgba(30, 27, 75, 0.6);
+					--border: rgba(139, 92, 246, 0.3);
+					--border-soft: rgba(139, 92, 246, 0.2);
+					--focus-border: rgba(139,92,246,0.7);
+					--glow: 0 0 0 2px rgba(139,92,246,0.25);
+					--shadow: 0 8px 32px rgba(0,0,0,0.4);
+					--kpi-bg: rgba(139,92,246,0.15);
+					--row-hover: rgba(139,92,246,0.1);
+					--hover-bg: rgba(15, 23, 42, 0.95);
+					--btn-bg: rgba(139, 92, 246, 0.2);
+					--btn-hover: rgba(139, 92, 246, 0.35);
+					--btn-active-bg: linear-gradient(135deg, #8b5cf6, #6366f1);
+					--range-btn-active-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+				}
+
+				[data-theme="light"] {
+					--page-bg: linear-gradient(135deg, #e0e7ff 0%, #f0f4ff 100%);
+					--card-bg: rgba(255, 255, 255, 0.6);
+					--card-border: rgba(99, 102, 241, 0.25);
+					--text: #1e1b4b;
+					--muted: rgba(30,27,75,0.5);
+					--topbar-bg: rgba(255, 255, 255, 0.8);
+					--topbar-border: rgba(99, 102, 241, 0.2);
+					--control-bg: rgba(255,255,255,0.7);
+					--border: rgba(99, 102, 241, 0.3);
+					--border-soft: rgba(99, 102, 241, 0.2);
+					--focus-border: rgba(99,102,241,0.7);
+					--glow: 0 0 0 2px rgba(99,102,241,0.2);
+					--shadow: 0 8px 32px rgba(99,102,241,0.15);
+					--kpi-bg: rgba(99,102,241,0.1);
+					--row-hover: rgba(99,102,241,0.08);
+					--hover-bg: rgba(255,255,255,0.97);
+					--btn-bg: rgba(99, 102, 241, 0.15);
+					--btn-hover: rgba(99, 102, 241, 0.28);
+					--btn-active-bg: linear-gradient(135deg, #6366f1, #8b5cf6);
+					--range-btn-active-shadow: 0 4px 20px rgba(99, 102, 241, 0.35);
+				}
+
+				*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+				body {
+					background: var(--page-bg);
+					font-family: 'Sora', sans-serif;
+					color: var(--text);
+					min-height: 100vh;
+				}
+
+				.page {
+					min-height: 100vh;
+					background: var(--page-bg);
+					position: relative;
+				}
+
+				.page::before {
+					content: '';
+					position: fixed;
+					top: -50%;
+					left: -50%;
+					width: 200%;
+					height: 200%;
+					background:
+						radial-gradient(circle at 20% 50%, rgba(139, 92, 246, 0.12) 0%, transparent 50%),
+						radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.12) 0%, transparent 50%),
+						radial-gradient(circle at 40% 20%, rgba(236, 72, 153, 0.08) 0%, transparent 40%);
+					animation: bgFloat 20s ease-in-out infinite;
+					pointer-events: none;
+					z-index: 0;
+				}
+
+				@keyframes bgFloat {
+					0%, 100% { transform: translate(0, 0); }
+					33% { transform: translate(20px, -20px); }
+					66% { transform: translate(-15px, 15px); }
+				}
+
+				/* ── Topbar ── */
+				.topbar {
+					position: sticky;
+					top: 0;
+					z-index: 100;
+					display: flex;
+					align-items: center;
+					gap: 16px;
+					flex-wrap: wrap;
+					padding: 14px 28px;
+					background: var(--topbar-bg);
+					border-bottom: 1px solid var(--topbar-border);
+					backdrop-filter: blur(20px) saturate(160%);
+					WebkitBackdropFilter: blur(20px) saturate(160%);
+				}
+
+				.topbarTs {
+					margin-left: auto;
+					font-family: 'JetBrains Mono', monospace;
+					font-size: 0.8rem;
+					color: var(--muted);
+					background: rgba(139, 92, 246, 0.1);
+					border: 1px solid rgba(139, 92, 246, 0.2);
+					border-radius: 10px;
+					padding: 6px 14px;
+					white-space: nowrap;
+				}
+
+				[data-theme="light"] .topbarTs {
+					background: rgba(99, 102, 241, 0.08);
+					border-color: rgba(99, 102, 241, 0.2);
+				}
+
+				.topbar .control {
+					display: flex;
+					flex-direction: column;
+					gap: 4px;
+					font-size: 0.75rem;
+					font-weight: 600;
+					text-transform: uppercase;
+					letter-spacing: 1px;
+					color: var(--muted);
+				}
+
+				.topbar .control input[type="password"] {
+					background: var(--control-bg);
+					border: 1px solid var(--border);
+					border-radius: 10px;
+					color: var(--text);
+					font-family: 'JetBrains Mono', monospace;
+					font-size: 0.85rem;
+					height: 38px;
+					padding: 0 12px;
+					outline: none;
+					transition: border-color 0.2s, box-shadow 0.2s;
+					min-width: 180px;
+					backdrop-filter: blur(14px);
+				}
+
+				.topbar .control input[type="password"]:focus {
+					border-color: var(--focus-border);
+					box-shadow: var(--glow);
+				}
+
+				.topbar .control input[type="password"]::placeholder {
+					color: var(--muted);
+				}
+
+				/* ── Controls row ── */
+				.controls {
+					display: flex;
+					align-items: flex-end;
+					gap: 16px;
+					flex-wrap: wrap;
+					margin-left: auto;
+				}
+
+				/* ── Range buttons ── */
+				.rangeGroup {
+					display: flex;
+					gap: 5px;
+					background: rgba(30, 27, 75, 0.45);
+					border: 1px solid var(--card-border);
+					backdrop-filter: blur(20px);
+					padding: 5px;
+					border-radius: 12px;
+				}
+
+				[data-theme="light"] .rangeGroup {
+					background: rgba(255,255,255,0.5);
+				}
+
+				.rangeBtn {
+					background: transparent;
+					border: none;
+					color: var(--muted);
+					padding: 7px 14px;
+					border-radius: 8px;
+					cursor: pointer;
+					font-family: 'Sora', sans-serif;
+					font-size: 0.8rem;
+					font-weight: 600;
+					transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+				}
+
+				.rangeBtn:hover:not(:disabled) {
+					background: rgba(139, 92, 246, 0.2);
+					color: var(--text);
+				}
+
+				.rangeBtn.active {
+					background: linear-gradient(135deg, #8b5cf6, #6366f1);
+					color: #ffffff;
+					box-shadow: var(--range-btn-active-shadow);
+				}
+
+				.rangeBtn:disabled {
+					opacity: 0.35;
+					cursor: not-allowed;
+				}
+
+				/* ── Refresh / theme button ── */
+				.btn {
+					background: var(--btn-bg);
+					border: 1px solid var(--card-border);
+					border-radius: 10px;
+					color: var(--text);
+					cursor: pointer;
+					font-family: 'Sora', sans-serif;
+					font-size: 0.85rem;
+					font-weight: 600;
+					height: 38px;
+					padding: 0 18px;
+					transition: background 0.2s, transform 0.15s;
+					backdrop-filter: blur(10px);
+					white-space: nowrap;
+				}
+
+				.btn:hover:not(:disabled) {
+					background: var(--btn-hover);
+					transform: translateY(-1px);
+				}
+
+				.btn:disabled {
+					opacity: 0.4;
+					cursor: not-allowed;
+				}
+
+				/* ── Status text ── */
+				.status {
+					font-size: 0.8rem;
+					color: var(--muted);
+					font-family: 'JetBrains Mono', monospace;
+					min-width: 0;
+					white-space: nowrap;
+					overflow: hidden;
+					text-overflow: ellipsis;
+					max-width: 220px;
+				}
+
+				/* ── Native device select ── */
+				.nativeSelect {
+					appearance: none;
+					-webkit-appearance: none;
+					background-color: rgba(30, 27, 75, 0.6);
+					background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(255,255,255,0.45)' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+					background-repeat: no-repeat;
+					background-position: right 12px center;
+					backdrop-filter: blur(14px) saturate(160%);
+					border: 1px solid rgba(139, 92, 246, 0.3);
+					border-radius: 10px;
+					color: #ffffff;
+					cursor: pointer;
+					font-family: 'Sora', sans-serif;
+					font-size: 0.85rem;
+					height: 38px;
+					outline: none;
+					padding: 0 36px 0 12px;
+					transition: border-color 0.2s, box-shadow 0.2s;
+					min-width: 180px;
+				}
+
+				.nativeSelect:focus {
+					border-color: rgba(139, 92, 246, 0.7);
+					box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.25);
+				}
+
+				.nativeSelect:disabled {
+					opacity: 0.4;
+					cursor: not-allowed;
+				}
+
+				.nativeSelect option {
+					background: #0f172a;
+					color: #ffffff;
+				}
+
+				[data-theme="light"] .nativeSelect {
+					background-color: rgba(255, 255, 255, 0.7);
+					background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='rgba(30,27,75,0.5)' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+					border-color: rgba(99, 102, 241, 0.3);
+					color: #1e1b4b;
+				}
+
+				[data-theme="light"] .nativeSelect:focus {
+					border-color: rgba(99, 102, 241, 0.7);
+					box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+				}
+
+				[data-theme="light"] .nativeSelect option {
+					background: #f0f4ff;
+					color: #1e1b4b;
+				}
+
+				/* ── Main grid ── */
+				.grid {
+					position: relative;
+					z-index: 1;
+					display: grid;
+					gap: 24px;
+					padding: 32px 28px;
+					grid-template-columns: 1fr;
+				}
+
+				/* ── Glass card base ── */
+				.card {
+					background: var(--card-bg);
+					border: 1px solid var(--card-border);
+					border-radius: 24px;
+					backdrop-filter: blur(20px) saturate(150%);
+					WebkitBackdropFilter: blur(20px) saturate(150%);
+					box-shadow: var(--shadow);
+					transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.35s;
+				}
+
+				.card:hover {
+					transform: translateY(-4px);
+					box-shadow: 0 24px 48px rgba(0, 0, 0, 0.35);
+				}
+
+				/* ── KPI strip ── */
+				.kpis {
+					display: grid;
+					grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+					gap: 1px;
+					overflow: hidden;
+					padding: 0;
+				}
+
+				.kpi {
+					padding: 24px 28px;
+					position: relative;
+					transition: background 0.2s;
+				}
+
+				.kpi:hover {
+					background: rgba(139, 92, 246, 0.06);
+				}
+
+				.kpi + .kpi::before {
+					content: '';
+					position: absolute;
+					left: 0;
+					top: 16%;
+					height: 68%;
+					width: 1px;
+					background: var(--card-border);
+				}
+
+				.kpiHeader {
+					display: flex;
+					align-items: center;
+					gap: 10px;
+					margin-bottom: 16px;
+				}
+
+				.kpiIconWrap {
+					width: 40px;
+					height: 40px;
+					border-radius: 12px;
+					background: linear-gradient(135deg, rgba(139,92,246,0.15), rgba(99,102,241,0.15));
+					border: 1px solid color-mix(in srgb, var(--kpi-color) 35%, transparent);
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					flex-shrink: 0;
+				}
+
+				.kpiLabel {
+					font-size: 0.72rem;
+					font-weight: 600;
+					text-transform: uppercase;
+					letter-spacing: 1.5px;
+					color: var(--muted);
+				}
+
+				.kpiValue {
+					font-size: 2.4rem;
+					font-weight: 700;
+					line-height: 1;
+					font-family: 'JetBrains Mono', monospace;
+					margin-bottom: 16px;
+					transition: transform 0.3s;
+				}
+
+				.kpiUnit {
+					font-size: 1.1rem;
+					color: var(--muted);
+					font-weight: 400;
+					margin-left: 3px;
+					font-family: 'Sora', sans-serif;
+				}
+
+				.kpiRange {
+					background: rgba(15, 23, 42, 0.4);
+					border: 1px solid rgba(139, 92, 246, 0.15);
+					border-radius: 10px;
+					padding: 10px 12px;
+				}
+
+				[data-theme="light"] .kpiRange {
+					background: rgba(255, 255, 255, 0.5);
+					border-color: rgba(99, 102, 241, 0.15);
+				}
+
+				.kpiRangeLabel {
+					display: block;
+					font-size: 0.65rem;
+					text-transform: uppercase;
+					letter-spacing: 1px;
+					color: var(--muted);
+					margin-bottom: 7px;
+					font-weight: 600;
+				}
+
+				.kpiRangeBar {
+					display: flex;
+					align-items: center;
+					gap: 8px;
+				}
+
+				.kpiRangeNum {
+					font-family: 'JetBrains Mono', monospace;
+					font-size: 0.72rem;
+					color: var(--text);
+					opacity: 0.85;
+					white-space: nowrap;
+				}
+
+				.kpiRangeLine {
+					flex: 1;
+					height: 3px;
+					border-radius: 2px;
+				}
+
+				/* ── Chart cards ── */
+				.chartCard {
+					padding: 28px 28px 20px;
+				}
+
+				.cardTitle {
+					font-size: 1rem;
+					font-weight: 600;
+					color: var(--text);
+					margin-bottom: 20px;
+					display: flex;
+					align-items: center;
+					gap: 10px;
+					letter-spacing: 0.3px;
+				}
+
+				.cardTitleDot {
+					display: inline-block;
+					width: 10px;
+					height: 10px;
+					border-radius: 50%;
+					box-shadow: 0 0 8px currentColor;
+					flex-shrink: 0;
+				}
+
+				.chartWrap {
+					height: 280px;
+				}
+
+				@media (max-width: 640px) {
+					.topbar { padding: 12px 16px; gap: 12px; }
+					.grid { padding: 20px 16px; gap: 16px; }
+					.kpiValue { font-size: 1.6rem; }
+					.chartWrap { height: 220px; }
+					.rangeBtn { padding: 6px 9px; font-size: 0.75rem; }
+					.controls { margin-left: 0; width: 100%; }
+				}
+			`}</style>
+
 			<header className="topbar">
 				<label className="control">
 					<span>Dashboard Key</span>
@@ -457,44 +1061,31 @@ export default function App() {
 					/>
 				</label>
 
-				{/* <div>
-					<div className="title">Room Monitoring</div>
-					<div className="subtitle">
-						MongoDB time-series → Vercel API → React dashboard
-					</div>
-				</div> */}
-
 				<div className="controls">
 					<label className="control">
 						<span>Device</span>
-						<Select
-							styles={selectStyles}
-							options={deviceOptions}
-							value={deviceOptions.find((o) => o.value === deviceId) || null}
-							onChange={(opt) => setDeviceId(opt?.value || '')}
-							isDisabled={!dashKey || deviceOptions.length === 0}
-							placeholder={dashKey ? 'Select device…' : 'Enter key first…'}
-							isSearchable
-							menuPortalTarget={document.body}
-						/>
+						<select
+							className="nativeSelect"
+							value={deviceId}
+							onChange={(e) => setDeviceId(e.target.value)}
+							disabled={!dashKey || devices.length === 0}
+						>
+							{devices.length === 0 ? (
+								<option value="">
+									{dashKey ? 'No devices found…' : 'Enter key first…'}
+								</option>
+							) : (
+								devices.map((d) => (
+									<option key={d} value={d}>
+										{d}
+									</option>
+								))
+							)}
+						</select>
 					</label>
-
-					{/* <label className="control">
-						<span>Range</span>
-						<Select
-							styles={selectStyles}
-							options={rangeOptions}
-							value={rangeOptions.find((o) => o.value === range) || null}
-							onChange={(opt) => setRange(opt?.value || '6h')}
-							isDisabled={!dashKey}
-							isSearchable={false}
-							menuPortalTarget={document.body}
-						/>
-					</label> */}
 
 					<div className="control">
 						<span>Range</span>
-
 						<div
 							className="rangeGroup"
 							role="group"
@@ -534,26 +1125,33 @@ export default function App() {
 						{theme === 'dark' ? '🌙' : '☀️'}
 					</button>
 				</div>
+				{latestTs !== '—' && (
+					<div className="topbarTs" title="Timestamp of latest reading">
+						🕐 {latestTs}
+					</div>
+				)}
 			</header>
 
 			<main className="grid">
 				<section className="card kpis">
 					<KpiCard
-						label="Temperature"
-						value={latest ? `${fmt1(latestTemperature)} °C` : '—'}
-						sub="latest in range"
+						metaKey="temperature"
+						value={latestTemperature}
+						min={rangeStats.temperature.min}
+						max={rangeStats.temperature.max}
 					/>
 					<KpiCard
-						label="Humidity"
-						value={latest ? `${fmt1(latestHumidity)} %` : '—'}
-						sub="latest in range"
+						metaKey="humidity"
+						value={latestHumidity}
+						min={rangeStats.humidity.min}
+						max={rangeStats.humidity.max}
 					/>
 					<KpiCard
-						label="AQI"
-						value={latest ? `${fmt1(latestAqi)}` : '—'}
-						sub="latest in range"
+						metaKey="aqi"
+						value={latestAqi}
+						min={rangeStats.aqi.min}
+						max={rangeStats.aqi.max}
 					/>
-					<KpiCard label="Timestamp" value={latestTs} sub="local time" />
 				</section>
 
 				<ChartCard
@@ -569,32 +1167,6 @@ export default function App() {
 					unit=" %"
 				/>
 				<ChartCard title="AQI" data={chartData} dataKey="aqi" unit="" />
-
-				{/* <section className="card tableCard">
-					<div className="cardTitle">Recent readings</div>
-					<div className="tableWrap">
-						<table>
-							<thead>
-								<tr>
-									<th>Time</th>
-									<th>Temp</th>
-									<th>Humidity</th>
-									<th>AQI</th>
-								</tr>
-							</thead>
-							<tbody>
-								{tableRows.map((r, idx) => (
-									<tr key={idx}>
-										<td>{r.ts}</td>
-										<td>{fmt1(r.temperature)} °C</td>
-										<td>{fmt1(r.humidity)} %</td>
-										<td>{fmt1(r.aqi)}</td>
-									</tr>
-								))}
-							</tbody>
-						</table>
-					</div>
-				</section> */}
 			</main>
 		</div>
 	);
